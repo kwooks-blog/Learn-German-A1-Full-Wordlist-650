@@ -140,16 +140,14 @@
       <h2>✍️ 문장 퀴즈</h2>
       <div id="sentence-quiz">단어를 선택하세요.</div>
       <div id="sentenceInputs"></div>
-      <button class="submit-btn" onclick="checkSentence()">제출</button>
-      <button class="reset-btn" onclick="resetQuiz()">퀴즈 초기화</button>
+      <button class="submit-btn" onclick="checkSentence()">정답 확인</button>
+      <!--button class="reset-btn" onclick="resetQuiz()">퀴즈 초기화</button-->
     </div>
   </div>
-
   <script>
     let player;
     let pauseTimeout;
     let quizLocked = false;
-    let sentenceLocked = false;
     let currentWord = '';
 
     const quizData = {
@@ -339,30 +337,37 @@
     }
 
     function checkSentence() {
-      if (sentenceLocked || !currentWord) return;
+      if (!currentWord) return;
       const data = quizData[currentWord];
       let correctCount = 0;
       for (let i = 0; i < data.answer.length; i++) {
         const inputElement = document.getElementById(`sentenceInput-${i}`);
         const userInput = inputElement.value.trim().toLowerCase();
+        const answerId = `sentenceAnswer-${i}`;
+        let answerSpan = document.getElementById(answerId);
+
         if (userInput === data.answer[i]) {
           correctCount++;
+          if (answerSpan) answerSpan.remove();
         } else {
-          if (!document.getElementById(`sentenceAnswer-${i}`)) {
-            const answerSpan = document.createElement('span');
-            answerSpan.id = `sentenceAnswer-${i}`;
+          if (!answerSpan) {
+            answerSpan = document.createElement('span');
+            answerSpan.id = answerId;
             answerSpan.style.color = 'gray';
             answerSpan.style.marginLeft = '10px';
-            answerSpan.textContent = `(정답: ${data.answer[i]})`;
             inputElement.parentNode.insertBefore(answerSpan, inputElement.nextSibling);
           }
+          answerSpan.textContent = `(정답: ${data.answer[i]})`;
+          setTimeout(() => {
+            const removeSpan = document.getElementById(answerId);
+            if (removeSpan) removeSpan.remove();
+          }, 4000);
         }
       }
       const percent = Math.round((correctCount / data.answer.length) * 100);
       const cell = document.getElementById(`sentenceResult-${currentWord}`);
       cell.textContent = `${percent}% 정답`;
       cell.style.color = percent === 100 ? 'lime' : 'tomato';
-      sentenceLocked = true;
     }
 
     function resetQuiz() {

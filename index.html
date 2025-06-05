@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>영상 학습 인터페이스</title>
+  <style>
+    body {
+      margin: 0;
+      background-color: #000;
+      color: white;
+      font-family: sans-serif;
+    }
+    .video-container {
+      position: fixed;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90%;
+      max-width: 800px;
+      aspect-ratio: 16 / 9;
+      z-index: 1000;
+      background: black;
+    }
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      border-radius: 8px;
+    }
+    .content-wrapper {
+      padding-top: 500px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .section {
+      margin: 30px 0;
+      width: 90%;
+      max-width: 800px;
+      background: #111;
+      padding: 20px;
+      border-radius: 10px;
+    }
+    .section h2 {
+      margin-top: 0;
+      color: #1e90ff;
+    }
+    .word-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .word-table th, .word-table td {
+      border: 1px solid #444;
+      padding: 10px;
+      text-align: center;
+    }
+    .word-button, .quiz-option, .submit-btn, .reset-btn {
+      background-color: #1e90ff;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      margin: 5px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .quiz-option:hover, .word-button:hover, .submit-btn:hover, .reset-btn:hover {
+      background-color: #4682b4;
+    }
+    input[type="text"] {
+      padding: 6px;
+      font-size: 16px;
+      border-radius: 4px;
+      border: none;
+      margin-left: 10px;
+    }
+    label {
+      display: block;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="video-container">
+    <div id="youtubePlayer"></div>
+  </div>
+  <div class="content-wrapper">
+    <div class="section">
+      <h2>🎯 단어 학습</h2>
+      <table class="word-table">
+        <thead>
+          <tr>
+            <th>단어 (뜻)</th>
+            <th>단어 퀴즈 결과</th>
+            <th>문장 퀴즈 결과</th>
+          </tr>
+        </thead>
+        <tbody id="wordTableBody">
+          <tr><td><button class="word-button" onclick="loadContent('sein')">sein - to be (이다)</button></td><td id="wordResult-sein">-</td><td id="sentenceResult-sein">-</td></tr>
+          <tr><td><button class="word-button" onclick="loadContent('haben')">haben - to have (가지다)</button></td><td id="wordResult-haben">-</td><td id="sentenceResult-haben">-</td></tr>
+          <tr><td><button class="word-button" onclick="loadContent('werden')">werden - to become (~이 되다)</button></td><td id="wordResult-werden">-</td><td id="sentenceResult-werden">-</td></tr>
+          <tr><td><button class="word-button" onclick="loadContent('können')">können - can (~할 수 있다)</button></td><td id="wordResult-können">-</td><td id="sentenceResult-können">-</td></tr>
+          <tr><td><button class="word-button" onclick="loadContent('müssen')">müssen - must (해야 한다)</button></td><td id="wordResult-müssen">-</td><td id="sentenceResult-müssen">-</td></tr>
+          <tr><td><button class="word-button" onclick="loadContent('sollen')">sollen - should (~해야 한다)</button></td><td id="wordResult-sollen">-</td><td id="sentenceResult-sollen">-</td></tr>
+          <tr><td><button class="word-button" onclick="loadContent('wollen')">wollen - want (원하다)</button></td><td id="wordResult-wollen">-</td><td id="sentenceResult-wollen">-</td></tr>
+          <tr><td><button class="word-button" onclick="loadContent('dürfen')">dürfen - be allowed to (허락받다)</button></td><td id="wordResult-dürfen">-</td><td id="sentenceResult-dürfen">-</td></tr>
+          <tr><td><button class="word-button" onclick="loadContent('mögen')">mögen - like (좋아하다)</button></td><td id="wordResult-mögen">-</td><td id="sentenceResult-mögen">-</td></tr>
+          <tr><td><button class="word-button" onclick="loadContent('abfahren')">abfahren - depart (출발하다)</button></td><td id="wordResult-abfahren">-</td><td id="sentenceResult-abfahren">-</td></tr>
+          <tr><td><button class="word-button" onclick="loadContent('abgeben')">abgeben - hand over (제출하다)</button></td><td id="wordResult-abgeben">-</td><td id="sentenceResult-abgeben">-</td></tr>
+          <tr><td><button class="word-button" onclick="loadContent('abholen')">abholen - pick up (데리러 가다)</button></td><td id="wordResult-abholen">-</td><td id="sentenceResult-abholen">-</td></tr>
+          <tr><td><button class="word-button" onclick="loadContent('abschließen')">abschließen - lock (잠그다)</button></td><td id="wordResult-abschließen">-</td><td id="sentenceResult-abschließen">-</td></tr>
+          <tr><td><button class="word-button" onclick="loadContent('anbieten')">anbieten - offer (제공하다)</button></td><td id="wordResult-anbieten">-</td><td id="sentenceResult-anbieten">-</td></tr>
+          <tr><td><button class="word-button" onclick="loadContent('anfangen')">anfangen - begin (시작하다)</button></td><td id="wordResult-anfangen">-</td><td id="sentenceResult-anfangen">-</td></tr>
+          <tr><td><button class="word-button" onclick="loadContent('ankommen')">ankommen - arrive (도착하다)</button></td><td id="wordResult-ankommen">-</td><td id="sentenceResult-ankommen">-</td></tr>
+          <tr><td><button class="word-button" onclick="loadContent('ankreuzen')">ankreuzen - tick (체크하다)</button></td><td id="wordResult-ankreuzen">-</td><td id="sentenceResult-ankreuzen">-</td></tr>
+          <tr><td><button class="word-button" onclick="loadContent('anmachen')">anmachen - turn on (켜다)</button></td><td id="wordResult-anmachen">-</td><td id="sentenceResult-anmachen">-</td></tr>
+          <tr><td><button class="word-button" onclick="loadContent('anmelden')">anmelden - register (등록하다)</button></td><td id="wordResult-anmelden">-</td><td id="sentenceResult-anmelden">-</td></tr>
+          <tr><td><button class="word-button" onclick="loadContent('anrufen')">anrufen - call (전화하다)</button></td><td id="wordResult-anrufen">-</td><td id="sentenceResult-anrufen">-</td></tr>
+          <tr><td><button class="word-button" onclick="loadContent('antworten')">antworten - reply (대답하다)</button></td><td id="wordResult-antworten">-</td><td id="sentenceResult-antworten">-</td></tr>
+          <tr><td><button class="word-button" onclick="loadContent('anziehen')">anziehen - put on (입다)</button></td><td id="wordResult-anziehen">-</td><td id="sentenceResult-anziehen">-</td></tr>
+          <tr><td><button class="word-button" onclick="loadContent('arbeiten')">arbeiten - work (일하다)</button></td><td id="wordResult-arbeiten">-</td><td id="sentenceResult-arbeiten">-</td></tr>
+          <tr><td><button class="word-button" onclick="loadContent('aufhören')">aufhören - stop (멈추다)</button></td><td id="wordResult-aufhören">-</td><td id="sentenceResult-aufhören">-</td></tr>
+          <tr><td><button class="word-button" onclick="loadContent('aufmachen')">aufmachen - open (열다)</button></td><td id="wordResult-aufmachen">-</td><td id="sentenceResult-aufmachen">-</td></tr>
+          <tr><td><button class="word-button" onclick="loadContent('aufräumen')">aufräumen - clean up (정리하다)</button></td><td id="wordResult-aufräumen">-</td><td id="sentenceResult-aufräumen">-</td></tr>
+          <tr><td><button class="word-button" onclick="loadContent('aufstehen')">aufstehen - get up (일어나다)</button></td><td id="wordResult-aufstehen">-</td><td id="sentenceResult-aufstehen">-</td></tr>
+          <tr><td><button class="word-button" onclick="loadContent('ausfüllen')">ausfüllen - fill out (작성하다)</button></td><td id="wordResult-ausfüllen">-</td><td id="sentenceResult-ausfüllen">-</td></tr>
+          <tr><td><button class="word-button" onclick="loadContent('ausmachen')">ausmachen - turn off (끄다)</button></td><td id="wordResult-ausmachen">-</td><td id="sentenceResult-ausmachen">-</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <h2>🧠 단어 퀴즈</h2>
+      <p id="word-quiz-question">단어를 선택하세요.</p>
+      <div id="word-quiz-options"></div>
+    </div>
+
+    <div class="section">
+      <h2>✍️ 문장 퀴즈</h2>
+      <div id="sentence-quiz">단어를 선택하세요.</div>
+      <div id="sentenceInputs"></div>
+      <button class="submit-btn" onclick="checkSentence()">제출</button>
+      <button class="reset-btn" onclick="resetQuiz()">퀴즈 초기화</button>
+    </div>
+  </div>
+
+  <script>
+    let player;
+    let pauseTimeout;
+    let quizLocked = false;
+    let sentenceLocked = false;
+    let currentWord = '';
+
+    const quizData = {
+      sein: { start: 40, end: 59, meaning: 'to be', sentence: ['Ich ___ Student.', 'Du ___ müde.', 'Er ___ Lehrer.', 'Wir ___ müde.', 'Ihr ___ zu Hause.', 'Sie ___ freundlich.'], answer: ['bin', 'bist', 'ist', 'sind', 'seid', 'sind'], options: ['to be', 'to have', 'to go'] },
+      haben: { start: 59, end: 81, meaning: 'to have', sentence: ['Ich ___ eine Katze.', 'Wir ___ ein Haus.', 'Sie ___ Hunger.', 'Du ___ Zeit.', 'Er ___ einen Hund.', 'Ihr ___ Glück.'], answer: ['habe', 'haben', 'hat', 'hast', 'hat', 'habt'], options: ['to run', 'to have', 'to be'] },
+      werden: { start: 81, end: 95, meaning: 'to become', sentence: ['Ich ___ Lehrer.', 'Er ___ müde.', 'Sie ___ Arzt.', 'Wir ___ alt.', 'Du ___ krank.', 'Ihr ___ stark.'], answer: ['werde', 'wird', 'wird', 'werden', 'wirst', 'werdet'], options: ['to have', 'to go', 'to become'] },
+
+      // können: { start: 95, end: 119, meaning: 'can', sentence: ['Ich ___ schwimmen.', 'Du ___ singen.', 'Wir ___ tanzen.'], answer: ['kann', 'kannst', 'können'], options: ['can', 'must', 'should'] },
+      // müssen: { start: 119, end: 138, meaning: 'must', sentence: ['Ich ___ jetzt gehen.', 'Du ___ arbeiten.', 'Sie ___ lernen.'], answer: ['muss', 'musst', 'müssen'], options: ['should', 'can', 'must'] },
+      // sollen: { start: 138, end: 158, meaning: 'should', sentence: ['Ich ___ helfen.', 'Du ___ zuhören.', 'Wir ___ warten.'], answer: ['soll', 'sollst', 'sollen'], options: ['should', 'must', 'can'] },
+      // wollen: { start: 158, end: 168, meaning: 'want', sentence: ['Ich ___ essen.', 'Du ___ schlafen.', 'Wir ___ spielen.'], answer: ['will', 'willst', 'wollen'], options: ['want', 'must', 'can'] },
+      // dürfen: { start: 168, end: 180, meaning: 'be allowed to', sentence: ['___ ich gehen?', 'Du ___ bleiben.', 'Wir ___ spielen.'], answer: ['darf', 'darfst', 'dürfen'], options: ['can', 'be allowed to', 'must'] },
+      // mögen: { start: 180, end: 200, meaning: 'like', sentence: ['Ich ___ Pizza.', 'Sie ___ Musik.', 'Wir ___ Bücher.'], answer: ['mag', 'mag', 'mögen'], options: ['like', 'must', 'want'] },
+
+
+      können: {
+        start: 95,
+        end: 119,
+        meaning: 'can',
+        sentence: [
+          'Ich ___ schwimmen.',
+          'Du ___ singen.',
+          'Wir ___ tanzen.',
+          'Er ___ lesen.',
+          'Ihr ___ kommen.',
+          'Sie ___ helfen.'
+        ],
+        answer: ['kann', 'kannst', 'können', 'kann', 'könnt', 'können'],
+        options: ['can', 'must', 'should']
+      },
+      müssen: {
+        start: 119,
+        end: 138,
+        meaning: 'must',
+        sentence: [
+          'Ich ___ jetzt gehen.',
+          'Du ___ arbeiten.',
+          'Sie ___ lernen.',
+          'Wir ___ früh aufstehen.',
+          'Ihr ___ ruhig sein.',
+          'Er ___ einkaufen.'
+        ],
+        answer: ['muss', 'musst', 'müssen', 'müssen', 'müsst', 'muss'],
+        options: ['should', 'can', 'must']
+      },
+      sollen: {
+        start: 138,
+        end: 158,
+        meaning: 'should',
+        sentence: [
+          'Ich ___ helfen.',
+          'Du ___ zuhören.',
+          'Wir ___ warten.',
+          'Er ___ lernen.',
+          'Ihr ___ kommen.',
+          'Sie ___ bleiben.'
+        ],
+        answer: ['soll', 'sollst', 'sollen', 'soll', 'sollt', 'sollen'],
+        options: ['should', 'must', 'can']
+      },
+      wollen: {
+        start: 158,
+        end: 168,
+        meaning: 'want',
+        sentence: [
+          'Ich ___ essen.',
+          'Du ___ schlafen.',
+          'Wir ___ spielen.',
+          'Er ___ lesen.',
+          'Ihr ___ schwimmen.',
+          'Sie ___ tanzen.'
+        ],
+        answer: ['will', 'willst', 'wollen', 'will', 'wollt', 'wollen'],
+        options: ['want', 'must', 'can']
+      },
+      dürfen: {
+        start: 168,
+        end: 180,
+        meaning: 'be allowed to',
+        sentence: [
+          '___ ich gehen?',
+          'Du ___ bleiben.',
+          'Wir ___ spielen.',
+          'Er ___ kommen.',
+          'Ihr ___ nicht sprechen.',
+          'Sie ___ wählen.'
+        ],
+        answer: ['darf', 'darfst', 'dürfen', 'darf', 'dürft', 'dürfen'],
+        options: ['can', 'be allowed to', 'must']
+      },
+      mögen: {
+        start: 180,
+        end: 200,
+        meaning: 'like',
+        sentence: [
+          'Ich ___ Pizza.',
+          'Sie ___ Musik.',
+          'Wir ___ Bücher.',
+          'Du ___ Eis.',
+          'Er ___ Fußball.',
+          'Ihr ___ Filme.'
+        ],
+        answer: ['mag', 'mag', 'mögen', 'magst', 'mag', 'mögt'],
+        options: ['like', 'must', 'want']
+      },
+      abfahren: { start: 205, end: 222, meaning: 'depart', sentence: ['Der Bus ___ gleich ab.', 'Ich ___ um 7 Uhr ab.', 'Wir ___ morgen ab.', 'Sie ___ früh ab.', 'Du ___ sofort ab.', 'Er ___ nicht ab.'], answer: ['fährt', 'fahre', 'fahren', 'fährt', 'fährst', 'fährt'], options: ['depart', 'arrive', 'stop'] },
+      abgeben: { start: 222, end: 242, meaning: 'hand over', sentence: ['Ich ___ meine Schlüssel ab.', 'Wir ___ das Paket ab.', 'Du ___ die Arbeit ab.', 'Sie ___ das Buch ab.', 'Er ___ sein Handy ab.', 'Ihr ___ eure Tickets ab.'], answer: ['gebe', 'geben', 'gibst', 'gibt', 'gibt', 'gebt'], options: ['hand over', 'pick up', 'lock'] },
+      abholen: { start: 242, end: 254, meaning: 'pick up', sentence: ['Wir ___ dich ab.', 'Ich ___ meinen Bruder ab.', 'Du ___ mich ab.', 'Sie ___ das Kind ab.', 'Er ___ seine Mutter ab.', 'Ihr ___ Oma ab.'], answer: ['holen', 'hole', 'holst', 'holt', 'holt', 'holt'], options: ['pick up', 'drop off', 'deliver'] },
+      abschließen: { start: 254, end: 270, meaning: 'lock', sentence: ['Ich ___ die Tür ab.', 'Du ___ das Fenster ab.', 'Wir ___ das Haus ab.', 'Sie ___ die Garage ab.', 'Er ___ das Büro ab.', 'Ihr ___ alles ab.'], answer: ['schließe', 'schließt', 'schließen', 'schließen', 'schließt', 'schließt'], options: ['lock', 'open', 'close'] },
+      anbieten: { start: 285, end: 300, meaning: 'offer', sentence: ['Ich ___ dir Tee an.', 'Wir ___ Hilfe an.', 'Sie ___ ein Geschenk an.', 'Er ___ mir Kaffee an.', 'Du ___ Wasser an.', 'Ihr ___ Getränke an.'], answer: ['biete', 'bieten', 'bietet', 'bietet', 'bietest', 'bietet'], options: ['offer', 'ask', 'order'] },
+      anfangen: { start: 300, end: 317, meaning: 'begin', sentence: ['Der Unterricht ___ gleich an.', 'Ich ___ mit der Arbeit an.', 'Wir ___ um 8 Uhr an.', 'Sie ___ heute an.', 'Er ___ später an.', 'Du ___ jetzt an.'], answer: ['fängt', 'fange', 'fangen', 'fangen', 'fängt', 'fängst'], options: ['begin', 'end', 'continue'] },
+      ankommen: { start: 317, end: 334, meaning: 'arrive', sentence: ['Der Zug ___ um 9 Uhr an.', 'Ich ___ spät an.', 'Wir ___ pünktlich an.', 'Sie ___ gleich an.', 'Du ___ zu spät an.', 'Er ___ nicht an.'], answer: ['kommt', 'komme', 'kommen', 'kommen', 'kommst', 'kommt'], options: ['arrive', 'depart', 'stay'] },
+      ankreuzen: { start: 334, end: 358, meaning: 'tick', sentence: ['Ich ___ die Antwort an.', 'Du ___ das Feld an.', 'Wir ___ alles an.', 'Sie ___ die Kästchen an.', 'Er ___ die Lösung an.', 'Ihr ___ die richtigen Antworten an.'], answer: ['kreuze', 'kreuzt', 'kreuzen', 'kreuzen', 'kreuzt', 'kreuzt'], options: ['tick', 'write', 'read'] },
+      anmachen: { start: 358, end: 374, meaning: 'turn on', sentence: ['Ich ___ das Licht an.', 'Du ___ den Fernseher an.', 'Wir ___ das Radio an.', 'Sie ___ den Computer an.', 'Er ___ die Lampe an.', 'Ihr ___ die Heizung an.'], answer: ['mache', 'machst', 'machen', 'machen', 'macht', 'macht'], options: ['turn on', 'turn off', 'check'] },
+      anmelden: { start: 374, end: 391, meaning: 'register', sentence: ['Ich ___ mich online an.', 'Du ___ dich jetzt an.', 'Wir ___ uns später an.', 'Sie ___ sich morgen an.', 'Er ___ sich neu an.', 'Ihr ___ euch gleich an.'], answer: ['melde', 'meldest', 'melden', 'melden', 'meldet', 'meldet'], options: ['register', 'login', 'call'] },
+      anrufen: { start: 391, end: 407, meaning: 'call', sentence: ['Ich ___ dich morgen an.', 'Du ___ mich heute an.', 'Wir ___ sie gleich an.', 'Sie ___ den Arzt an.', 'Er ___ seine Mutter an.', 'Ihr ___ das Büro an.'], answer: ['rufe', 'rufst', 'rufen', 'rufen', 'ruft', 'ruft'], options: ['call', 'text', 'visit'] },
+      antworten: { start: 407, end: 423, meaning: 'reply', sentence: ['Ich ___ bald.', 'Du ___ sofort.', 'Wir ___ ihm.', 'Sie ___ später.', 'Er ___ auf die Frage.', 'Ihr ___ nicht.'], answer: ['antworte', 'antwortest', 'antworten', 'antworten', 'antwortet', 'antwortet'], options: ['reply', 'question', 'listen'] },
+      anziehen: { start: 423, end: 441, meaning: 'put on', sentence: ['Ich ___ einen Mantel an.', 'Du ___ deine Jacke an.', 'Er ___ die Schuhe an.', 'Wir ___ warme Kleidung an.', 'Ihr ___ neue Hemden an.', 'Sie ___ ihre Uniform an.'], answer: ['ziehe', 'ziehst', 'zieht', 'ziehen', 'zieht', 'ziehen'], options: ['put on', 'take off', 'buy'] },
+      arbeiten: { start: 441, end: 457, meaning: 'work', sentence: ['Ich ___ als Lehrer.', 'Du ___ hart.', 'Er ___ im Büro.', 'Wir ___ zusammen.', 'Ihr ___ heute.', 'Sie ___ jeden Tag.'], answer: ['arbeite', 'arbeitest', 'arbeitet', 'arbeiten', 'arbeitet', 'arbeiten'], options: ['work', 'study', 'rest'] },
+      aufhören: { start: 457, end: 472, meaning: 'stop', sentence: ['Ich ___ jetzt auf.', 'Du ___ bald auf.', 'Er ___ nicht auf.', 'Wir ___ sofort auf.', 'Ihr ___ morgen auf.', 'Sie ___ alle auf.'], answer: ['höre', 'hörst', 'hört', 'hören', 'hört', 'hören'], options: ['stop', 'start', 'continue'] },
+      aufmachen: { start: 472, end: 488, meaning: 'open', sentence: ['Ich ___ das Fenster auf.', 'Du ___ die Tür auf.', 'Er ___ den Laden auf.', 'Wir ___ alles auf.', 'Ihr ___ den Koffer auf.', 'Sie ___ das Paket auf.'], answer: ['mache', 'machst', 'macht', 'machen', 'macht', 'machen'], options: ['open', 'close', 'lock'] },
+      aufräumen: { start: 488, end: 508, meaning: 'clean up', sentence: ['Ich ___ mein Zimmer auf.', 'Du ___ die Küche auf.', 'Er ___ das Wohnzimmer auf.', 'Wir ___ das Büro auf.', 'Ihr ___ das Haus auf.', 'Sie ___ die Garage auf.'], answer: ['räume', 'räumst', 'räumt', 'räumen', 'räumt', 'räumen'], options: ['clean up', 'mess up', 'leave'] },
+      aufstehen: { start: 508, end: 540, meaning: 'get up', sentence: ['Ich ___ um 7 Uhr auf.', 'Du ___ früh auf.', 'Er ___ spät auf.', 'Wir ___ zusammen auf.', 'Ihr ___ sofort auf.', 'Sie ___ nicht auf.'], answer: ['stehe', 'stehst', 'steht', 'stehen', 'steht', 'stehen'], options: ['get up', 'lie down', 'sit down'] },
+      ausfüllen: { start: 540, end: 560, meaning: 'fill out', sentence: ['Ich ___ das Formular aus.', 'Du ___ die Anmeldung aus.', 'Er ___ den Bogen aus.', 'Wir ___ alle Felder aus.', 'Ihr ___ die Daten aus.', 'Sie ___ den Antrag aus.'], answer: ['fülle', 'füllst', 'füllt', 'füllen', 'füllt', 'füllen'], options: ['fill out', 'delete', 'print'] },
+      ausmachen: { start: 560, end: 575, meaning: 'turn off', sentence: ['Ich ___ das Licht aus.', 'Du ___ den Fernseher aus.', 'Er ___ das Radio aus.', 'Wir ___ den Computer aus.', 'Ihr ___ das Handy aus.', 'Sie ___ die Musik aus.'], answer: ['mache', 'machst', 'macht', 'machen', 'macht', 'machen'], options: ['turn off', 'turn on', 'plug in'] },
+    // 계속 이어짐
+    };
+
+    function onYouTubeIframeAPIReady() {
+      player = new YT.Player('youtubePlayer', {
+        height: '100%',
+        width: '100%',
+        videoId: '1oD7_WDEY14',
+        playerVars: { 'playsinline': 1 },
+        events: { 'onReady': onPlayerReady }
+      });
+    }
+
+    function onPlayerReady(event) {}
+
+    function seekTo(seconds) {
+      if (player && typeof player.seekTo === 'function') {
+        player.seekTo(seconds, true);
+        player.playVideo();
+      }
+    }
+
+    function loadContent(word) {
+      const data = quizData[word];
+      seekTo(data.start);
+      if (pauseTimeout) clearTimeout(pauseTimeout);
+      const pauseTime = (data.end - data.start) * 1000;
+      if (pauseTime > 0) {
+        pauseTimeout = setTimeout(() => {
+          player.pauseVideo();
+        }, pauseTime);
+      }
+      currentWord = word;
+      document.getElementById('word-quiz-question').textContent = `"${word}"의 뜻은 무엇인가요?`;
+      const optionsHtml = data.options.map(option => {
+        const correct = option === data.meaning;
+        return `<button class='quiz-option' onclick="checkWordAnswer('${correct}')">${option}</button>`;
+      }).join('');
+      document.getElementById('word-quiz-options').innerHTML = optionsHtml;
+      const sentenceDiv = document.getElementById('sentence-quiz');
+      const inputsDiv = document.getElementById('sentenceInputs');
+      sentenceDiv.innerHTML = '';
+      inputsDiv.innerHTML = '';
+      data.sentence.forEach((sentence, index) => {
+        inputsDiv.innerHTML += `<label>${sentence} <input type='text' id='sentenceInput-${index}' placeholder='정답 입력'></label><br>`;
+      });
+      quizLocked = false;
+      sentenceLocked = false;
+    }
+
+    function checkWordAnswer(isCorrect) {
+      if (quizLocked || !currentWord) return;
+      const cell = document.getElementById(`wordResult-${currentWord}`);
+      if (isCorrect === 'true') {
+        cell.textContent = '정답';
+        cell.style.color = 'lime';
+      } else {
+        cell.textContent = '오답';
+        cell.style.color = 'tomato';
+      }
+      quizLocked = true;
+    }
+
+    function checkSentence() {
+      if (sentenceLocked || !currentWord) return;
+      const data = quizData[currentWord];
+      let correctCount = 0;
+      for (let i = 0; i < data.answer.length; i++) {
+        const inputElement = document.getElementById(`sentenceInput-${i}`);
+        const userInput = inputElement.value.trim().toLowerCase();
+        if (userInput === data.answer[i]) {
+          correctCount++;
+        } else {
+          if (!document.getElementById(`sentenceAnswer-${i}`)) {
+            const answerSpan = document.createElement('span');
+            answerSpan.id = `sentenceAnswer-${i}`;
+            answerSpan.style.color = 'gray';
+            answerSpan.style.marginLeft = '10px';
+            answerSpan.textContent = `(정답: ${data.answer[i]})`;
+            inputElement.parentNode.insertBefore(answerSpan, inputElement.nextSibling);
+          }
+        }
+      }
+      const percent = Math.round((correctCount / data.answer.length) * 100);
+      const cell = document.getElementById(`sentenceResult-${currentWord}`);
+      cell.textContent = `${percent}% 정답`;
+      cell.style.color = percent === 100 ? 'lime' : 'tomato';
+      sentenceLocked = true;
+    }
+
+    function resetQuiz() {
+      if (player && typeof player.pauseVideo === 'function') {
+        player.pauseVideo();
+      }
+      document.querySelectorAll('[id^="wordResult-"]').forEach(cell => { cell.textContent = '-'; cell.style.color = 'white'; });
+      document.querySelectorAll('[id^="sentenceResult-"]').forEach(cell => { cell.textContent = '-'; cell.style.color = 'white'; });
+      document.querySelectorAll('[id^="sentenceInput-"]').forEach(input => { input.value = ''; });
+      document.querySelectorAll('[id^="sentenceAnswer-"]').forEach(answer => { answer.remove(); });
+      quizLocked = false;
+      sentenceLocked = false;
+    }
+
+    var tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    var firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+  </script>
+</body>
+</html>

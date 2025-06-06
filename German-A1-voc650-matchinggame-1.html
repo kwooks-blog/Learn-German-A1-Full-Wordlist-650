@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>독일어 매칭 게임</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
       font-family: sans-serif;
@@ -12,10 +13,12 @@
       flex-direction: column;
       align-items: center;
       padding: 20px;
+      box-sizing: border-box;
     }
 
     h2 {
       color: #1e90ff;
+      text-align: center;
     }
 
     .container {
@@ -24,6 +27,8 @@
       margin-top: 30px;
       flex-wrap: wrap;
       justify-content: center;
+      width: 100%;
+      max-width: 800px;
     }
 
     .list {
@@ -31,6 +36,8 @@
       flex-direction: column;
       gap: 10px;
       min-width: 150px;
+      width: 100%;
+      max-width: 300px;
     }
 
     .item {
@@ -76,23 +83,27 @@
     .score {
       margin-top: 10px;
       font-size: 18px;
+      text-align: center;
     }
 
     .word-pair {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      width: 350px;
-      margin: 3px 0;
-      padding: 5px 10px;
+      width: 100%;
+      max-width: 500px;
+      margin: 4px 0;
+      padding: 6px 10px;
       background: #333;
       border-radius: 4px;
+      box-sizing: border-box;
     }
 
     .word-left {
       display: flex;
       align-items: center;
       gap: 8px;
+      flex-wrap: wrap;
     }
 
     .speak-btn {
@@ -113,6 +124,25 @@
       .container {
         flex-direction: column;
         align-items: center;
+      }
+
+      .word-pair {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+      }
+
+      .list {
+        max-width: 100%;
+      }
+
+      .item {
+        font-size: 16px;
+      }
+
+      button {
+        width: 100%;
+        max-width: 300px;
       }
     }
   </style>
@@ -172,6 +202,7 @@
     let selectedGerman = null;
     let selectedMeaning = null;
     let matchedCount = 0;
+    let germanVoice = null;
 
     function shuffle(array) {
       for (let i = array.length - 1; i > 0; i--) {
@@ -286,6 +317,15 @@
     function speakGerman(text) {
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'de-DE';
+
+      if (germanVoice) {
+        utterance.voice = germanVoice;
+      }
+
+      if (!germanVoice) {
+        alert("이 기기에서는 독일어 음성이 활성화되어 있지 않을 수 있습니다. 설정에서 독일어 음성을 다운로드하세요.");
+      }
+
       window.speechSynthesis.speak(utterance);
     }
 
@@ -293,7 +333,17 @@
       document.getElementById('scoreBoard').textContent = `맞춘 개수: ${matchedCount} / ${words.length}`;
     }
 
-    // 초기 전시용 렌더링
+    function loadVoices() {
+      const voices = speechSynthesis.getVoices();
+      germanVoice = voices.find(v => v.lang.startsWith('de') && v.localService);
+    }
+
+    if (typeof speechSynthesis !== 'undefined') {
+      speechSynthesis.onvoiceschanged = loadVoices;
+      loadVoices();
+    }
+
+    // 초기 전시 화면
     showIntro();
   </script>
 </body>

@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>독일어 매칭 게임</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #222;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    h2 {
+      color: #1e90ff;
+    }
+
+    .container {
+      display: flex;
+      gap: 50px;
+      margin-top: 30px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-width: 150px;
+    }
+
+    .item {
+      background: #444;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .item:hover {
+      background: #666;
+    }
+
+    .matched {
+      background: limegreen !important;
+      color: white;
+      cursor: default;
+    }
+
+    .wrong {
+      background: tomato !important;
+    }
+
+    .selected {
+      outline: 2px solid yellow;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background: #1e90ff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #4682b4;
+    }
+
+    .score {
+      margin-top: 10px;
+      font-size: 18px;
+    }
+
+    .word-pair {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 350px;
+      margin: 3px 0;
+      padding: 5px 10px;
+      background: #333;
+      border-radius: 4px;
+    }
+
+    .word-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .speak-btn {
+      background: #555;
+      border: none;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .speak-btn:hover {
+      background: #777;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h2>독일어 A1 동사 매칭 게임</h2>
+  <div id="introView">
+    <p>아래는 게임에 포함될 독일어 단어와 그 의미입니다.</p>
+    <div id="wordPairs"></div>
+    <button onclick="startGame()">게임 시작</button>
+  </div>
+
+  <div id="gameView" style="display:none;">
+    <p>왼쪽 독일어 단어와 오른쪽 뜻을 맞춰보세요!</p>
+    <div class="score" id="scoreBoard">맞춘 개수: 0 / 30</div>
+    <div class="container">
+      <div id="germanList" class="list"></div>
+      <div id="meaningList" class="list"></div>
+    </div>
+    <button onclick="resetToIntro()">다시 시작</button>
+  </div>
+
+  <script>
+    const words = [
+      { german: 'sein', meaning: 'to be (이다)' },
+      { german: 'haben', meaning: 'to have (가지다)' },
+      { german: 'werden', meaning: 'to become (~이 되다)' },
+      { german: 'können', meaning: 'can (~할 수 있다)' },
+      { german: 'müssen', meaning: 'must (해야 한다)' },
+      { german: 'sollen', meaning: 'should (~해야 한다)' },
+      { german: 'wollen', meaning: 'want (원하다)' },
+      { german: 'dürfen', meaning: 'be allowed to (허락받다)' },
+      { german: 'mögen', meaning: 'like (좋아하다)' },
+      { german: 'abfahren', meaning: 'depart (출발하다)' },
+      { german: 'abgeben', meaning: 'hand over (제출하다)' },
+      { german: 'abholen', meaning: 'pick up (데리러 가다)' },
+      { german: 'abschließen', meaning: 'lock (잠그다)' },
+      { german: 'anbieten', meaning: 'offer (제공하다)' },
+      { german: 'anfangen', meaning: 'begin (시작하다)' },
+      { german: 'ankommen', meaning: 'arrive (도착하다)' },
+      { german: 'ankreuzen', meaning: 'tick (체크하다)' },
+      { german: 'anmachen', meaning: 'turn on (켜다)' },
+      { german: 'anmelden', meaning: 'register (등록하다)' },
+      { german: 'anrufen', meaning: 'call (전화하다)' },
+      { german: 'antworten', meaning: 'reply (대답하다)' },
+      { german: 'anziehen', meaning: 'put on (입다)' },
+      { german: 'arbeiten', meaning: 'work (일하다)' },
+      { german: 'aufhören', meaning: 'stop (멈추다)' },
+      { german: 'aufmachen', meaning: 'open (열다)' },
+      { german: 'aufräumen', meaning: 'clean up (정리하다)' },
+      { german: 'aufstehen', meaning: 'get up (일어나다)' },
+      { german: 'ausfüllen', meaning: 'fill out (작성하다)' },
+      { german: 'ausmachen', meaning: 'turn off (끄다)' },
+      { german: 'aussehen', meaning: 'look like (~처럼 보이다)' }
+    ];
+
+    let selectedGerman = null;
+    let selectedMeaning = null;
+    let matchedCount = 0;
+
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+
+    function showIntro() {
+      const wordPairs = document.getElementById('wordPairs');
+      wordPairs.innerHTML = '';
+      words.forEach(w => {
+        const div = document.createElement('div');
+        div.className = 'word-pair';
+        div.innerHTML = `
+          <div class="word-left">
+            <strong>${w.german}</strong>
+            <button class="speak-btn" onclick="speakGerman('${w.german}')">🔊</button>
+          </div>
+          <span>${w.meaning}</span>
+        `;
+        wordPairs.appendChild(div);
+      });
+    }
+
+    function startGame() {
+      document.getElementById('introView').style.display = 'none';
+      document.getElementById('gameView').style.display = 'block';
+      resetGame();
+    }
+
+    function resetToIntro() {
+      document.getElementById('gameView').style.display = 'none';
+      document.getElementById('introView').style.display = 'block';
+      selectedGerman = null;
+      selectedMeaning = null;
+      matchedCount = 0;
+      showIntro();
+    }
+
+    function resetGame() {
+      matchedCount = 0;
+      selectedGerman = null;
+      selectedMeaning = null;
+      renderLists();
+    }
+
+    function renderLists() {
+      const germanList = document.getElementById('germanList');
+      const meaningList = document.getElementById('meaningList');
+      germanList.innerHTML = '';
+      meaningList.innerHTML = '';
+
+      const shuffledGerman = [...words];
+      const shuffledMeaning = [...words];
+      shuffle(shuffledGerman);
+      shuffle(shuffledMeaning);
+
+      shuffledGerman.forEach(w => {
+        const div = document.createElement('div');
+        div.textContent = w.german;
+        div.className = 'item';
+        div.dataset.german = w.german;
+        div.onclick = () => handleSelect('german', div);
+        germanList.appendChild(div);
+      });
+
+      shuffledMeaning.forEach(w => {
+        const div = document.createElement('div');
+        div.textContent = w.meaning;
+        div.className = 'item';
+        div.dataset.meaning = w.german;
+        div.onclick = () => handleSelect('meaning', div);
+        meaningList.appendChild(div);
+      });
+
+      updateScore();
+    }
+
+    function handleSelect(type, element) {
+      if (element.classList.contains('matched')) return;
+
+      if (type === 'german') {
+        if (selectedGerman) selectedGerman.classList.remove('wrong', 'selected');
+        selectedGerman = element;
+        selectedGerman.classList.add('selected');
+        speakGerman(selectedGerman.textContent);
+      } else {
+        if (selectedMeaning) selectedMeaning.classList.remove('wrong', 'selected');
+        selectedMeaning = element;
+        selectedMeaning.classList.add('selected');
+      }
+
+      if (selectedGerman && selectedMeaning) {
+        const correct = selectedGerman.dataset.german === selectedMeaning.dataset.meaning;
+        if (correct) {
+          selectedGerman.classList.add('matched');
+          selectedMeaning.classList.add('matched');
+          matchedCount++;
+          updateScore();
+        } else {
+          selectedGerman.classList.add('wrong');
+          selectedMeaning.classList.add('wrong');
+        }
+        selectedGerman.classList.remove('selected');
+        selectedMeaning.classList.remove('selected');
+        selectedGerman = null;
+        selectedMeaning = null;
+      }
+    }
+
+    function speakGerman(text) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'de-DE';
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function updateScore() {
+      document.getElementById('scoreBoard').textContent = `맞춘 개수: ${matchedCount} / ${words.length}`;
+    }
+
+    // 초기 전시용 렌더링
+    showIntro();
+  </script>
+</body>
+</html>

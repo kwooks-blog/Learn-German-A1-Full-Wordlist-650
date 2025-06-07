@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>독일어 매칭 게임 - 2단계 모드</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #222;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+    h2 {
+      color: #1e90ff;
+    }
+    .container {
+      display: flex;
+      gap: 50px;
+      margin-top: 30px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .item {
+      background: #444;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      text-align: center;
+    }
+    .item:hover {
+      background: #666;
+    }
+    .matched {
+      background: limegreen !important;
+      color: white;
+    }
+    .wrong {
+      background: tomato !important;
+    }
+    .progress {
+      margin-top: 10px;
+      font-size: 16px;
+    }
+    button {
+      margin: 10px;
+      padding: 10px 20px;
+      background: #1e90ff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h2>독일어 A1 동사 매칭 게임 - 2단계 모드</h2>
+  <div class="progress" id="progress"></div>
+  <div class="container">
+    <div id="germanList" class="list"></div>
+    <div id="meaningList" class="list"></div>
+  </div>
+  <button onclick="startStage2()">2단계 모드 시작</button>
+  <button onclick="nextRound()">다음</button>
+
+  <script>
+    const allWords = [
+      { german: 'sein', meaning: 'to be (이다)' },
+      { german: 'haben', meaning: 'to have (가지다)' },
+      { german: 'werden', meaning: 'to become (~이 되다)' },
+      { german: 'können', meaning: 'can (~할 수 있다)' },
+      { german: 'müssen', meaning: 'must (해야 한다)' },
+      { german: 'sollen', meaning: 'should (~해야 한다)' },
+      { german: 'wollen', meaning: 'want (원하다)' },
+      { german: 'dürfen', meaning: 'be allowed to (허락받다)' },
+      { german: 'mögen', meaning: 'like (좋아하다)' },
+      { german: 'abfahren', meaning: 'depart (출발하다)' },
+      { german: 'abgeben', meaning: 'hand over (제출하다)' },
+      { german: 'abholen', meaning: 'pick up (데리러 가다)' },
+      { german: 'abschließen', meaning: 'lock (잠그다)' },
+      { german: 'anbieten', meaning: 'offer (제공하다)' },
+      { german: 'anfangen', meaning: 'begin (시작하다)' },
+      { german: 'ankommen', meaning: 'arrive (도착하다)' },
+      { german: 'ankreuzen', meaning: 'tick (체크하다)' },
+      { german: 'anmachen', meaning: 'turn on (켜다)' },
+      { german: 'anmelden', meaning: 'register (등록하다)' },
+      { german: 'anrufen', meaning: 'call (전화하다)' },
+      { german: 'antworten', meaning: 'reply (대답하다)' },
+      { german: 'anziehen', meaning: 'put on (입다)' },
+      { german: 'arbeiten', meaning: 'work (일하다)' },
+      { german: 'aufhören', meaning: 'stop (멈추다)' },
+      { german: 'aufmachen', meaning: 'open (열다)' },
+      { german: 'aufräumen', meaning: 'clean up (정리하다)' },
+      { german: 'aufstehen', meaning: 'get up (일어나다)' },
+      { german: 'ausfüllen', meaning: 'fill out (작성하다)' },
+      { german: 'ausmachen', meaning: 'turn off (끄다)' },
+      { german: 'aussehen', meaning: 'look like (~처럼 보이다)' }
+    ];
+
+    let wordCounts = {};
+    let correctCounts = {};
+    let selectedGerman = null;
+    let selectedMeaning = null;
+
+    function startStage2() {
+      wordCounts = {};
+      correctCounts = {};
+      allWords.forEach(w => {
+        wordCounts[w.german] = 0;
+        correctCounts[w.german] = 0;
+      });
+      nextRound();
+    }
+
+    function updateProgress() {
+      const progress = document.getElementById('progress');
+      const summary = allWords.map(w => `${w.german}: ${correctCounts[w.german]}/5`).join(' | ');
+      progress.textContent = `진행 상황: ${summary}`;
+    }
+
+    function nextRound() {
+      if (Object.values(correctCounts).every(count => count >= 5)) {
+        alert("🎉 게임 종료! 모든 단어를 5회 이상 맞췄습니다.");
+        return;
+      }
+
+      const germanList = document.getElementById('germanList');
+      const meaningList = document.getElementById('meaningList');
+      germanList.innerHTML = '';
+      meaningList.innerHTML = '';
+
+      const remainingWords = allWords.filter(w => wordCounts[w.german] < 5);
+      const roundGerman = getRandomItems(remainingWords, 5);
+      roundGerman.forEach(w => wordCounts[w.german]++);
+
+      const matched = roundGerman[Math.floor(Math.random() * roundGerman.length)];
+      const roundMeaning = getRandomItems(allWords.filter(w => w.german !== matched.german), 4);
+      roundMeaning.push(matched);
+      shuffle(roundMeaning);
+
+      roundGerman.forEach(w => {
+        const div = document.createElement('div');
+        div.textContent = w.german;
+        div.className = 'item';
+        div.dataset.german = w.german;
+        div.onclick = () => handleSelect('german', div);
+        germanList.appendChild(div);
+      });
+
+      roundMeaning.forEach(w => {
+        const div = document.createElement('div');
+        div.textContent = w.meaning;
+        div.className = 'item';
+        div.dataset.meaning = w.german;
+        div.onclick = () => handleSelect('meaning', div);
+        meaningList.appendChild(div);
+      });
+
+      updateProgress();
+    }
+
+    function handleSelect(type, element) {
+      if (type === 'german') {
+        selectedGerman = element;
+      } else {
+        selectedMeaning = element;
+      }
+
+      if (selectedGerman && selectedMeaning) {
+        const correct = selectedGerman.dataset.german === selectedMeaning.dataset.meaning;
+        if (correct) {
+          selectedGerman.classList.add('matched');
+          selectedMeaning.classList.add('matched');
+          correctCounts[selectedGerman.dataset.german]++;
+        } else {
+          selectedGerman.classList.add('wrong');
+          selectedMeaning.classList.add('wrong');
+        }
+        selectedGerman = null;
+        selectedMeaning = null;
+        updateProgress();
+      }
+    }
+
+    function getRandomItems(arr, n) {
+      const copy = [...arr];
+      shuffle(copy);
+      return copy.slice(0, n);
+    }
+
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+  </script>
+</body>
+</html>

@@ -98,7 +98,7 @@
     <div id="germanList" class="list"></div>
     <div id="meaningList" class="list"></div>
   </div>
-  <button onclick="startStage2()">2단계 모드 시작</button>
+  <!--button onclick="startStage2()">2단계 모드 시작</button-->
   <button onclick="nextRound()">다음</button>
 
   <script>
@@ -206,13 +206,17 @@
       germanList.innerHTML = '';
       meaningList.innerHTML = '';
 
-      const remainingWords = currentWords.filter(w => wordCounts[w.german] < 5);
-      const roundGerman = getRandomItems(remainingWords, 5);
+      const availableWords = currentWords.filter(w => wordCounts[w.german] < 5);
+      if (availableWords.length < 5) {
+        alert("❗ 더 이상 문제를 생성할 수 없습니다.");
+        return;
+      }
+
+      const roundGerman = getRandomItems(availableWords, 5);
       roundGerman.forEach(w => wordCounts[w.german]++);
 
-      const matched = roundGerman[Math.floor(Math.random() * roundGerman.length)];
-      const roundMeaning = getRandomItems(currentWords.filter(w => w.german !== matched.german), 4);
-      roundMeaning.push(matched);
+      // 정답이 5개가 되도록 의미도 동일하게 설정
+      const roundMeaning = roundGerman.map(w => w);
       shuffle(roundMeaning);
 
       roundGerman.forEach(w => {
@@ -220,7 +224,10 @@
         div.textContent = w.german;
         div.className = 'item';
         div.dataset.german = w.german;
-        div.onclick = () => handleSelect('german', div);
+        div.onclick = () => {
+          speakGerman(w.german);
+          handleSelect('german', div);
+        };
         germanList.appendChild(div);
       });
 
@@ -252,6 +259,8 @@
         } else {
           selectedGerman.classList.add('wrong');
           selectedMeaning.classList.add('wrong');
+          const correctMeaning = currentWords.find(w => w.german === selectedGerman.dataset.german)?.meaning;
+          alert(`❌ 틀렸습니다! 정답은: ${correctMeaning}`);
         }
         selectedGerman = null;
         selectedMeaning = null;
@@ -270,6 +279,12 @@
         const j = Math.floor(Math.random() * (i + 1));
         [array[i], array[j]] = [array[j], array[i]];
       }
+    }
+
+    function speakGerman(text) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'de-DE';
+      speechSynthesis.speak(utterance);
     }
   </script>
 </body>

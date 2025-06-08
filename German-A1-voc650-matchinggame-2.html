@@ -22,12 +22,15 @@
       gap: 50px;
       margin-top: 30px;
       flex-wrap: wrap;
-      justify-content: center;
+      justify-content: space-between;
+      width: 100%;
+      max-width: 370px;
     }
     .list {
       display: flex;
       flex-direction: column;
       gap: 10px;
+      flex: 1 1 45%;
     }
     .item {
       background: #444;
@@ -59,10 +62,37 @@
       border-radius: 6px;
       cursor: pointer;
     }
+    .day-buttons {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      width: 100%;
+      max-width: 370px;
+      flex-wrap: nowrap;
+      margin-bottom: 10px;
+    }
+    @media (max-width: 370px) {
+      .day-buttons {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      .container {
+        flex-direction: column;
+        align-items: center;
+      }
+      .list {
+        width: 100%;
+        max-width: 320px;
+      }
+    }
   </style>
 </head>
 <body>
   <h2>독일어 A1 동사 매칭 게임 - 2단계 모드</h2>
+  <div class="day-buttons">
+    <button onclick="setDay(1)">Day 1</button>
+    <button onclick="setDay(2)">Day 2</button>
+  </div>
   <div class="progress" id="progress"></div>
   <div class="container">
     <div id="germanList" class="list"></div>
@@ -72,7 +102,7 @@
   <button onclick="nextRound()">다음</button>
 
   <script>
-    const allWords = [
+    const day1Words = [
       { german: 'sein', meaning: 'to be (이다)' },
       { german: 'haben', meaning: 'to have (가지다)' },
       { german: 'werden', meaning: 'to become (~이 되다)' },
@@ -105,15 +135,54 @@
       { german: 'aussehen', meaning: 'look like (~처럼 보이다)' }
     ];
 
+    const day2Words = [
+      { german: 'aussehen', meaning: 'look like (~처럼 보이다)' },
+      { german: 'aussteigen', meaning: 'get out (내리다)' },
+      { german: 'sich ausziehen', meaning: 'undress (옷을 벗다)' },
+      { german: 'sich ärgern', meaning: 'get angry (화내다)' },
+      { german: 'baden', meaning: 'take a bath (목욕하다)' },
+      { german: 'bedeuten', meaning: 'mean (의미하다)' },
+      { german: 'beginnen', meaning: 'begin (시작하다)' },
+      { german: 'bekommen', meaning: 'receive (받다)' },
+      { german: 'benutzen', meaning: 'use (사용하다)' },
+      { german: 'bestellen', meaning: 'order (주문하다)' },
+      { german: 'besuchen', meaning: 'visit (방문하다)' },
+      { german: 'bezahlen', meaning: 'pay (지불하다)' },
+      { german: 'bitten', meaning: 'ask/request (부탁하다)' },
+      { german: 'bleiben', meaning: 'stay (머무르다)' },
+      { german: 'brauchen', meaning: 'need (필요하다)' },
+      { german: 'bringen', meaning: 'bring (가져오다)' },
+      { german: 'buchstabieren', meaning: 'spell (철자하다)' },
+      { german: 'danken', meaning: 'thank (감사하다)' },
+      { german: 'denken', meaning: 'think (생각하다)' },
+      { german: 'drucken', meaning: 'print (출력하다)' },
+      { german: 'drücken', meaning: 'press (누르다)' },
+      { german: 'dürfen', meaning: 'be allowed to (허락되다)' },
+      { german: 'einkaufen', meaning: 'shop (쇼핑하다)' },
+      { german: 'einladen', meaning: 'invite (초대하다)' },
+      { german: 'einsteigen', meaning: 'get in (탑승하다)' },
+      { german: 'empfehlen', meaning: 'recommend (추천하다)' },
+      { german: 'entschuldigen', meaning: 'apologize (사과하다)' },
+      { german: 'erklären', meaning: 'explain (설명하다)' },
+      { german: 'erlauben', meaning: 'allow (허락하다)' },
+      { german: 'erzählen', meaning: 'tell (말하다)' }
+    ];
+
+    let currentWords = day1Words;
     let wordCounts = {};
     let correctCounts = {};
     let selectedGerman = null;
     let selectedMeaning = null;
 
+    function setDay(day) {
+      currentWords = day === 1 ? day1Words : day2Words;
+      startStage2();
+    }
+
     function startStage2() {
       wordCounts = {};
       correctCounts = {};
-      allWords.forEach(w => {
+      currentWords.forEach(w => {
         wordCounts[w.german] = 0;
         correctCounts[w.german] = 0;
       });
@@ -122,7 +191,7 @@
 
     function updateProgress() {
       const progress = document.getElementById('progress');
-      const summary = allWords.map(w => `${w.german}: ${correctCounts[w.german]}/5`).join(' | ');
+      const summary = currentWords.map(w => `${w.german}: ${correctCounts[w.german] || 0}/5`).join(' | ');
       progress.textContent = `진행 상황: ${summary}`;
     }
 
@@ -137,12 +206,12 @@
       germanList.innerHTML = '';
       meaningList.innerHTML = '';
 
-      const remainingWords = allWords.filter(w => wordCounts[w.german] < 5);
+      const remainingWords = currentWords.filter(w => wordCounts[w.german] < 5);
       const roundGerman = getRandomItems(remainingWords, 5);
       roundGerman.forEach(w => wordCounts[w.german]++);
 
       const matched = roundGerman[Math.floor(Math.random() * roundGerman.length)];
-      const roundMeaning = getRandomItems(allWords.filter(w => w.german !== matched.german), 4);
+      const roundMeaning = getRandomItems(currentWords.filter(w => w.german !== matched.german), 4);
       roundMeaning.push(matched);
       shuffle(roundMeaning);
 

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Word Quiz Game</title>
+  <style>
+    body {
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      background: #f0f8ff;
+      text-align: center;
+      padding: 20px;
+    }
+    .card {
+      border: 3px dashed #ffa500;
+      border-radius: 30px;
+      background: #fff8dc;
+      padding: 40px;
+      margin: 40px auto;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 4px 4px 15px rgba(0,0,0,0.2);
+    }
+    h1 {
+      color: #ff69b4;
+      font-size: 2.2em;
+    }
+    .question {
+      font-size: 1.5em;
+      margin-bottom: 20px;
+    }
+    input, button, select {
+      font-size: 1.2em;
+      padding: 10px;
+      margin: 10px;
+      border-radius: 10px;
+    }
+    .feedback {
+      font-weight: bold;
+      margin-top: 15px;
+    }
+    .cute {
+      font-size: 3em;
+    }
+  </style>
+</head>
+<body>
+  <h1>Word Quiz Game 🐢⭐</h1>
+  <div id="quiz" class="card"></div>
+  <div id="score" class="card" style="display:none;"></div>
+  <script>
+    const words = [
+      ["aussehen", "look like (닮다)"],
+      ["aussteigen", "get out (내리다)"],
+      ["sich ausziehen", "undress (벗다)"],
+      ["sich ärgern", "get angry (화나다)"],
+      ["baden", "take a bath (목욕하다)"],
+      ["bedeuten", "mean (의미하다)"],
+      ["beginnen", "begin (시작하다)"],
+      ["bekommen", "get (받다)"],
+      ["benutzen", "use (사용하다)"],
+      ["bestellen", "order (주문하다)"],
+      ["besuchen", "visit (방문하다)"],
+      ["bezahlen", "pay (지불하다)"],
+      ["bitten", "ask/request (부탁하다)"],
+      ["bleiben", "stay (머무르다)"],
+      ["brauchen", "need (필요하다)"],
+      ["bringen", "bring (가져오다)"],
+      ["buchstabieren", "spell (철자를 말하다)"],
+      ["danken", "thank (감사하다)"],
+      ["denken", "think (생각하다)"],
+      ["drucken", "print (인쇄하다)"],
+      ["drücken", "press (누르다)"],
+      ["dürfen", "be allowed (허락되다)"],
+      ["einkaufen", "shop (쇼핑하다)"],
+      ["einladen", "invite (초대하다)"],
+      ["einsteigen", "get in (탑승하다)"],
+      ["empfehlen", "recommend (추천하다)"],
+      ["entschuldigen", "apologize (사과하다)"],
+      ["erklären", "explain (설명하다)"],
+      ["erlauben", "allow (허락하다)"],
+      ["erzählen", "tell (이야기하다)"],
+      ["essen", "eat (먹다)"]
+    ];
+
+    let index = 0;
+    let score = 0;
+    let stage = 0;
+
+    const quizEl = document.getElementById("quiz");
+    const scoreEl = document.getElementById("score");
+
+    function maskWord(word, percent) {
+      let len = word.length;
+      let maskCount = Math.floor(len * percent);
+      let indexes = [];
+      while(indexes.length < maskCount) {
+        let i = Math.floor(Math.random() * len);
+        if (!indexes.includes(i) && word[i] !== ' ') indexes.push(i);
+      }
+      return [...word].map((c, i) => indexes.includes(i) ? '_' : c).join('');
+    }
+
+    function speak(text) {
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.lang = 'de-DE';
+      speechSynthesis.speak(utter);
+    }
+
+    function showQuestion() {
+      if (index >= words.length) {
+        if (++stage < 4) {
+          index = 0;
+        } else {
+          quizEl.style.display = 'none';
+          scoreEl.style.display = 'block';
+          scoreEl.innerHTML = `<h2>🎉 총점: ${score} / ${words.length * 10 * 4}점</h2>`;
+          return;
+        }
+      }
+
+      let [word, meaning] = words[index];
+      let content = `<div class="question">`;
+      speak(word);
+
+      if (stage === 0) {
+        let choices = [meaning];
+        while (choices.length < 4) {
+          let m = words[Math.floor(Math.random() * words.length)][1];
+          if (!choices.includes(m)) choices.push(m);
+        }
+        choices.sort(() => Math.random() - 0.5);
+        content += `<p><strong>${word}</strong> 의 뜻은?</p>`;
+        choices.forEach(choice => {
+          content += `<button onclick="checkAnswer('${choice}', '${meaning}')">${choice}</button><br/>`;
+        });
+      } else {
+        const percent = [0.2, 0.5, 1][stage - 1];
+        content += `<p><strong>${meaning}</strong> 에 해당하는 단어를 입력하세요:</p>`;
+        content += `<input type="text" id="answer" placeholder="${maskWord(word, percent)}" />`;
+        content += `<br/><button onclick="checkAnswer(document.getElementById('answer').value.trim(), '${word}')">제출</button>`;
+      }
+      content += `<div class="feedback" id="feedback"></div></div>`;
+      quizEl.innerHTML = content;
+    }
+
+    function checkAnswer(user, correct) {
+      const fb = document.getElementById("feedback");
+      if (user.toLowerCase() === correct.toLowerCase()) {
+        fb.innerHTML = "✅ 정답입니다!";
+        score += 10;
+      } else {
+        fb.innerHTML = `❌ 오답입니다. 정답은 <strong>${correct}</strong> 입니다.`;
+      }
+      index++;
+      setTimeout(showQuestion, 1500);
+    }
+
+    showQuestion();
+  </script>
+</body>
+</html>

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <title>독일어 단어 퀴즈</title>
+  <style>
+    body {
+      background-color: #fffbe6;
+      text-align: center;
+      padding: 20px;
+    }
+    .question {
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+    .option, input[type="text"] {
+      display: block;
+      margin: 10px auto;
+      padding: 10px;
+      font-size: 18px;
+    }
+    .feedback {
+      font-weight: bold;
+      font-size: 20px;
+    }
+    .hidden {
+      display: none;
+    }
+    .button {
+      padding: 10px 20px;
+      background-color: #ffcccb;
+      border: none;
+      border-radius: 10px;
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+  <h1>귀여운 독일어 단어 퀴즈 🐣</h1>
+  <div id="quiz"></div>
+  <div class="feedback" id="feedback"></div>
+  <button class="button" onclick="nextQuestion()">다음 문제</button>
+  <script>
+    const words = [
+      { word: "essen", meaning: "eat", meaningKr: "영어(먹다)" },
+      { word: "fahren", meaning: "drive", meaningKr: "영어(운전하다)" },
+      { word: "feiern", meaning: "celebrate", meaningKr: "영어(축하하다)" },
+      { word: "fehlen", meaning: "be missing", meaningKr: "영어(없다, 빠지다)" },
+      { word: "fernsehen", meaning: "watch TV", meaningKr: "영어(티비를 보다)" },
+      { word: "finden", meaning: "find", meaningKr: "영어(찾다)" },
+      { word: "fliegen", meaning: "fly", meaningKr: "영어(날다)" },
+      { word: "abfliegen", meaning: "fly off/leave", meaningKr: "영어(출발하다)" },
+      { word: "fragen", meaning: "ask", meaningKr: "영어(질문하다)" },
+      { word: "sich freuen", meaning: "be glad", meaningKr: "영어(기뻐하다)" }
+    ];
+
+    let score = 0;
+    let current = 0;
+    let set = 0;
+    const quiz = document.getElementById('quiz');
+    const feedback = document.getElementById('feedback');
+
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+
+    function maskWord(word, ratio) {
+      const count = Math.floor(word.length * ratio);
+      const indexes = new Set();
+      while (indexes.size < count) {
+        indexes.add(Math.floor(Math.random() * word.length));
+      }
+      return [...word].map((ch, i) => indexes.has(i) ? '_' : ch).join('');
+    }
+
+    function speak(text) {
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.lang = 'de-DE';
+      speechSynthesis.speak(utter);
+    }
+
+    function renderQuestion() {
+      feedback.textContent = '';
+      quiz.innerHTML = '';
+      if (current >= words.length) {
+        set++;
+        current = 0;
+        if (set >= 4) {
+          quiz.innerHTML = `<h2>총점: ${score} / 100</h2>`;
+          document.querySelector('button').style.display = 'none';
+          return;
+        }
+      }
+
+      const q = words[current];
+      if (set === 0) {
+        speak(q.word);
+        quiz.innerHTML += `<div class="question">'${q.word}'의 올바른 뜻은?</div>`;
+        let options = [q.meaningKr];
+        while (options.length < 4) {
+          const rand = words[Math.floor(Math.random() * words.length)].meaningKr;
+          if (!options.includes(rand)) options.push(rand);
+        }
+        shuffle(options);
+        options.forEach(opt => {
+          const btn = document.createElement('button');
+          btn.className = 'option button';
+          btn.textContent = opt;
+          btn.onclick = () => checkAnswer(opt === q.meaningKr);
+          quiz.appendChild(btn);
+        });
+      } else {
+        let mask = set === 1 ? maskWord(q.word, 0.2) : set === 2 ? maskWord(q.word, 0.5) : "_".repeat(q.word.length);
+        quiz.innerHTML = `<div class="question">'${q.meaningKr}'에 해당하는 단어를 써보세요: <br /><b>${mask}</b></div>`;
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.onchange = () => checkAnswer(input.value.trim().toLowerCase() === q.word);
+        quiz.appendChild(input);
+      }
+    }
+
+    function checkAnswer(correct) {
+      feedback.textContent = correct ? '정답이에요! 🐥 +10점' : '틀렸어요! 😢';
+      if (correct) score += 10;
+    }
+
+    function nextQuestion() {
+      current++;
+      renderQuestion();
+    }
+
+    renderQuestion();
+  </script>
+</body>
+</html>

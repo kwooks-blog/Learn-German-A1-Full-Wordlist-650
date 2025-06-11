@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>독일어 단어 퀴즈 - 전체 세트</title>
+  <style>
+    body { background-color: #FFF8DC; text-align: center; padding: 30px; }
+    .quiz-box { background: #FFFAF0; border: 3px dashed #FFA07A; border-radius: 25px; padding: 20px; width: 80%; margin: 0 auto; display: none; }
+    .question { font-size: 24px; margin-bottom: 20px; }
+    .option-btn, .submit-btn, .nav-btn { background-color: #FFDAB9; border: 2px solid #F4A460; padding: 10px 20px; border-radius: 15px; cursor: pointer; font-size: 18px; margin: 10px; }
+    .option-btn:hover, .submit-btn:hover, .nav-btn:hover { background-color: #F5DEB3; }
+    .feedback { font-weight: bold; margin-top: 15px; }
+    input[type="text"] { font-size: 20px; padding: 8px; border-radius: 10px; border: 2px solid #F4A460; text-align: center; margin-top: 10px; }
+    .audio-btn { margin-top: 10px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div id="intro" class="quiz-box" style="display:block">
+    <h1>🐥 독일어 단어 퀴즈 🐥</h1>
+    <p>재미있는 단어 퀴즈에 도전해 보세요!</p>
+    <button class="nav-btn" onclick="startSet(1)">세트 1 시작 (객관식)</button>
+  </div>
+
+  <div id="quiz" class="quiz-box">
+    <div class="question" id="question"></div>
+    <button class="audio-btn" onclick="playAudio()">🔊 발음 듣기</button>
+    <div id="options"></div>
+    <input type="text" id="answer" style="display:none" />
+    <button class="submit-btn" onclick="checkAnswer()">제출</button>
+    <div class="feedback" id="feedback"></div>
+  </div>
+
+  <script>
+    const words = [
+      { word: "heiraten", meaning: "get married (결혼하다)" },
+      { word: "heißen", meaning: "be named / be called (불리다)" },
+      { word: "helfen", meaning: "help / assist (돕다)" },
+      { word: "holen", meaning: "pick up / get (가져오다)" },
+      { word: "hören", meaning: "listen / hear (듣다)" },
+      { word: "kaufen", meaning: "buy (사다)" },
+      { word: "kennen", meaning: "know (알다)" },
+      { word: "kennenlernen", meaning: "meet / get to know (만나다/알게 되다)" },
+      { word: "kochen", meaning: "cook (요리하다)" },
+      { word: "kommen", meaning: "come (오다)" }
+    ];
+
+    let current = 0;
+    let score = 0;
+    let set = 1;
+
+    function startSet(setNumber) {
+      set = setNumber;
+      current = 0;
+      score = 0;
+      document.getElementById('intro').style.display = 'none';
+      document.getElementById('quiz').style.display = 'block';
+      showQuestion();
+    }
+
+    function showQuestion() {
+      const q = words[current];
+      document.getElementById('question').textContent = `Q${current + 1}. ${set === 1 ? q.word : q.meaning}`;
+      document.getElementById('feedback').textContent = '';
+      document.getElementById('answer').style.display = 'none';
+      document.getElementById('answer').value = '';
+      document.getElementById('options').innerHTML = '';
+
+      if (set === 1) {
+        const shuffled = shuffleArray([q.meaning, ...getRandomMeanings(q.meaning)]);
+        shuffled.forEach(opt => {
+          const btn = document.createElement('button');
+          btn.textContent = opt;
+          btn.className = 'option-btn';
+          btn.onclick = () => checkAnswer(opt);
+          document.getElementById('options').appendChild(btn);
+        });
+      } else {
+        document.getElementById('answer').style.display = 'inline-block';
+        document.getElementById('answer').value =
+          set === 2 ? maskWord(q.word, 0.2) :
+          set === 3 ? maskWord(q.word, 0.5) :
+          "";
+      }
+      playAudio();
+    }
+
+    function checkAnswer(selected = null) {
+      const correct = set === 1 ? words[current].meaning : words[current].word.toLowerCase();
+      const userAnswer = set === 1 ? selected : document.getElementById('answer').value.trim().toLowerCase();
+      const feedback = document.getElementById('feedback');
+
+      if (userAnswer === correct) {
+        feedback.textContent = '✅ 정답이에요!';
+        feedback.style.color = 'green';
+        score += 10;
+      } else {
+        feedback.textContent = `❌ 오답이에요! 정답: ${correct}`;
+        feedback.style.color = 'red';
+      }
+      setTimeout(() => {
+        current++;
+        if (current < words.length) {
+          showQuestion();
+        } else {
+          if (set < 4) {
+            document.getElementById('quiz').style.display = 'none';
+            document.getElementById('intro').style.display = 'block';
+            document.getElementById('intro').innerHTML = `<h2>세트 ${set} 완료! 점수: ${score}점</h2><button class="nav-btn" onclick="startSet(${set + 1})">세트 ${set + 1} 시작</button>`;
+          } else {
+            document.getElementById('quiz').innerHTML = `<h2>🎉 모든 세트 완료! 총점: ${score}점</h2>`;
+          }
+        }
+      }, 2000);
+    }
+
+    function playAudio() {
+      const text = set === 1 ? words[current].word : words[current].word;
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.lang = 'de-DE';
+      speechSynthesis.speak(utter);
+    }
+
+    function maskWord(word, percent) {
+      const length = word.length;
+      const maskCount = Math.floor(length * percent);
+      let masked = word.split('');
+      let maskedIndices = [];
+      while (maskedIndices.length < maskCount) {
+        let i = Math.floor(Math.random() * length);
+        if (!maskedIndices.includes(i)) maskedIndices.push(i);
+      }
+      maskedIndices.forEach(i => masked[i] = '_');
+      return masked.join('');
+    }
+
+    function getRandomMeanings(correctMeaning) {
+      const allMeanings = words.map(w => w.meaning).filter(m => m !== correctMeaning);
+      return shuffleArray(allMeanings).slice(0, 3);
+    }
+
+    function shuffleArray(array) {
+      return array.sort(() => Math.random() - 0.5);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>독일어 A1-A2 Challenge – 1300단어 완전 정복</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --fg:#222;--muted:#8a8a8a;--bg:#fafafa;--paper:#fff;--chip:#f2f2f2;
+      --primary:#667eea;--primary-600:#5a6fd8;--choice:#f4f4f5;--choice-hover:#ececee;
+      --ok:#22c55e;--bad:#ef4444;--content-w:860px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.45 "Inter","Noto Sans KR",system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial}
+
+    /* App shell */
+    .topbar{position:sticky;top:0;z-index:50;background:var(--paper);border-bottom:1px solid #eee;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,0.05)}
+    .brand{margin:0;font-size:22px;font-weight:800;color:var(--primary)}
+    .toolbar{display:flex;gap:8px;align-items:center}
+    .chip{background:var(--chip);padding:6px 12px;border-radius:999px;color:#444;font-size:14px;font-weight:600}
+
+    .btn{border:0;border-radius:12px;padding:12px 18px;cursor:pointer;transition:.18s transform,.18s background,.18s box-shadow;font-weight:800}
+    .btn:hover{transform:translateY(-1px)}
+    .btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
+    .btn-primary{background:var(--primary);color:#fff}
+    .btn-primary:hover{background:var(--primary-600)}
+    .btn-ghost{background:#f3f3f3;color:#333}
+    .btn-ghost:hover{background:#e9e9e9}
+    .btn.small{padding:8px 12px;border-radius:10px}
+    .btn.large{padding:14px 20px}
+    .btn.xlarge{padding:16px 22px;font-size:18px}
+
+    .view{display:none;padding:18px}
+    .view.active{display:block}
+
+    /* Home */
+    .home{max-width:780px;margin:24px auto}
+    .lead{text-align:center;margin:12px 0 12px 0;color:var(--muted);font-size:18px}
+    .grid.sets{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;max-width:560px;margin:0 auto}
+
+    .set-card{background:white;border-radius:16px;padding:24px;text-align:center;box-shadow:0 4px 16px rgba(0,0,0,0.08);border:2px solid transparent;transition:all 0.3s ease;cursor:pointer}
+    .set-card:hover{transform:translateY(-4px);box-shadow:0 8px 24px rgba(0,0,0,0.12)}
+    .set-card.a1{background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);color:white}
+    .set-card.a2{background:linear-gradient(135deg, #f093fb 0%, #f5576c 100%);color:white}
+    .set-icon{font-size:3em;margin-bottom:12px}
+    .set-title{font-size:1.4em;font-weight:800;margin-bottom:8px}
+    .set-subtitle{opacity:0.9;font-size:1em}
+
+    /* Level select */
+    .levels{max-width:760px;margin:12px auto}
+    .levels .bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+    .hint{text-align:center;color:var(--muted);margin:14px 0;font-size:16px}
+    .level-buttons{max-width:560px;margin:0 auto;gap:12px;display:flex;flex-direction:column}
+
+    /* Quiz */
+    .status{display:flex;justify-content:space-between;align-items:center;max-width:var(--content-w);margin:6px auto 0 auto}
+    .quiz-wrap{position:relative;max-width:var(--content-w);margin:24px auto}
+    .word{text-align:center;font-size:44px;margin:24px 0 18px 0;font-weight:900;letter-spacing:.2px;color:var(--primary)}
+    .word-info{text-align:center;margin-bottom:24px;padding:12px;background:#f8f9fa;border-radius:12px;font-size:14px;color:var(--muted)}
+    .choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    .choices.hidden{display:none}
+    .choice{background:var(--choice);border-radius:14px;padding:16px 14px;text-align:center;font-weight:800;cursor:pointer;border:2px solid transparent;transition:all 0.2s ease}
+    .choice:hover{background:var(--choice-hover);transform:translateY(-2px)}
+    .choice.correct{border-color:var(--ok);background:#ecfdf5}
+    .choice.wrong{border-color:var(--bad);background:#fef2f2}
+
+    /* Right-bottom dock INSIDE the content width */
+    .controls-dock{position:sticky;bottom:12px;display:flex;justify-content:flex-end;gap:10px;padding:10px 0;margin-top:18px;z-index:40}
+
+    /* Modal */
+    .modal{position:fixed;inset:0;background:rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;z-index:60}
+    .modal.hidden{display:none}
+    .modal-card{background:#fff;border-radius:16px;max-width:520px;width:92vw;padding:26px 22px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.15)}
+    .result-title{font-size:28px;margin:0 0 8px 0}
+    .result-detail{font-size:18px;color:#555;margin:0 0 18px 0}
+
+    /* ID modal extra */
+    .modal-card input{width:100%;padding:12px 14px;font-size:16px;border:1px solid #e6e6e6;border-radius:10px}
+    .modal-card .desc{color:#777;margin:8px 0 16px}
+
+    @media (max-width:520px){
+      .word{font-size:36px}
+      .btn.large{padding:12px 16px}
+      .grid.sets{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <h1 class="brand">🇩🇪 독일어 A1-A2 Challenge</h1>
+    <div class="toolbar">
+      <span id="crumb" class="chip">레벨 선택</span>
+      <button id="back-btn" class="btn btn-ghost small" style="display:none">← 뒤로</button>
+      <button id="tts-btn" class="btn btn-ghost small" title="다시 듣기" style="display:none">🔊</button>
+    </div>
+  </header>
+
+  <!-- 1) 세트 선택 -->
+  <section id="view-sets" class="view active">
+    <div class="home">
+      <p class="lead">독일어 레벨을 선택하세요 (총 1,300개 단어)</p>
+      <div class="grid sets">
+        <div class="set-card a1" data-set="a1">
+          <div class="set-icon">🌟</div>
+          <div class="set-title">A1 기초</div>
+          <div class="set-subtitle">650개 단어</div>
+        </div>
+        <div class="set-card a2" data-set="a2">
+          <div class="set-icon">⭐</div>
+          <div class="set-title">A2 중급</div>
+          <div class="set-subtitle">650개 단어</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2) 단계 선택 -->
+  <section id="view-levels" class="view">
+    <div class="levels">
+      <div class="bar">
+        <span id="chosen-set" class="chip"></span>
+        <button id="level-back" class="btn btn-ghost small">← 뒤로</button>
+      </div>
+      <div class="hint">난이도를 선택하세요 (보기 개수)</div>
+      <div class="level-buttons">
+        <button class="btn btn-primary" data-level="1">1단계 (2지선다)</button>
+        <button class="btn btn-ghost" data-level="2">2단계 (4지선다)</button>
+        <button class="btn btn-ghost" data-level="3">3단계 (6지선다)</button>
+        <button class="btn btn-ghost" data-level="4">4단계 (테스트 · 6지선다 · 6초)</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3) 퀴즈 -->
+  <section id="view-quiz" class="view">
+    <div class="status">
+      <span id="status-chip" class="chip"></span>
+      <span id="timer-chip" class="chip" style="display:none">⏱ 6s</span>
+    </div>
+
+    <div class="quiz-wrap">
+      <h2 id="word" class="word">word</h2>
+      <div id="word-info" class="word-info" style="display:none">독일어 → 한국어</div>
+      <div id="choices" class="choices hidden"></div>
+      <div class="controls-dock">
+        <button id="idk-btn" class="btn btn-ghost large">모름</button>
+        <button id="toggle-choices-btn" class="btn btn-ghost large">보기</button>
+        <button id="next-btn" class="btn btn-primary large" disabled>다음 ▶️</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 결과 모달 (정답/오답) -->
+  <div id="result-modal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <h3 id="result-title" class="result-title">정답</h3>
+      <p id="result-detail" class="result-detail"></p>
+      <button id="modal-next" class="btn btn-primary xlarge">다음 문제로</button>
+    </div>
+  </div>
+
+  <!-- 아이디 입력 모달 (4단계 전용) -->
+  <div id="id-modal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <h3 class="result-title" style="margin-bottom:6px">아이디 입력</h3>
+      <p class="desc">4단계(테스트) 결과 저장을 위해 아이디를 입력하세요.</p>
+      <input id="user-id-input" type="text" placeholder="예: german01" />
+      <div style="display:flex;gap:10px;justify-content:center;margin-top:16px">
+        <button id="id-cancel" class="btn btn-ghost">취소</button>
+        <button id="id-start" class="btn btn-primary">시작</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (function(){
+    // ================== 설정 ==================
+    // 구글 앱스 스크립트 Web App URL (필요시 추가)
+    const SPREADSHEET_URL = '';
+
+    // ================== 독일어 데이터 ==================
+    const SETS = {
+      a1: [
+        // Day 1: 인사 & 기본 표현
+        {de:'hallo',ko:'안녕'},{de:'guten Morgen',ko:'좋은 아침'},{de:'guten Tag',ko:'안녕하세요'},{de:'guten Abend',ko:'좋은 저녁'},{de:'gute Nacht',ko:'잘 자요'},
+        {de:'auf Wiedersehen',ko:'안녕히 가세요'},{de:'tschüss',ko:'안녕 (비격식)'},{de:'bitte',ko:'제발, 부탁드립니다'},{de:'danke',ko:'감사합니다'},{de:'entschuldigen Sie',ko:'실례합니다'},
+        {de:'Entschuldigung',ko:'미안합니다'},{de:'wie geht es Ihnen?',ko:'어떻게 지내세요?'},{de:'gut',ko:'좋다'},{de:'schlecht',ko:'나쁘다'},{de:'ja',ko:'네'},
+        {de:'nein',ko:'아니요'},{de:'ich',ko:'나'},{de:'Sie',ko:'당신 (존댓말)'},{de:'du',ko:'너 (반말)'},{de:'er',ko:'그 (남성)'},
+        {de:'sie',ko:'그녀 (여성)'},{de:'es',ko:'그것 (중성)'},{de:'wir',ko:'우리'},{de:'ihr',ko:'너희'},{de:'sein',ko:'~이다'},
+        {de:'haben',ko:'가지다'},{de:'werden',ko:'~가 되다'},{de:'können',ko:'할 수 있다'},{de:'müssen',ko:'~해야 한다'},{de:'wollen',ko:'원하다'},
+        {de:'sollen',ko:'~해야 한다'},{de:'dürfen',ko:'허락되다'},{de:'mögen',ko:'좋아하다'},{de:'machen',ko:'만들다, 하다'},{de:'gehen',ko:'가다'},
+        {de:'kommen',ko:'오다'},{de:'sehen',ko:'보다'},{de:'hören',ko:'듣다'},{de:'sprechen',ko:'말하다'},{de:'sagen',ko:'말하다'},
+        {de:'fragen',ko:'묻다'},{de:'antworten',ko:'답하다'},{de:'verstehen',ko:'이해하다'},{de:'wissen',ko:'알다'},{de:'kennen',ko:'알다 (사람/장소)'},
+        {de:'leben',ko:'살다'},{de:'arbeiten',ko:'일하다'},{de:'lernen',ko:'배우다'},{de:'studieren',ko:'공부하다'},
+
+        // Day 2: 가족 & 개인정보
+        {de:'die Familie',ko:'가족'},{de:'der Vater',ko:'아버지'},{de:'die Mutter',ko:'어머니'},{de:'die Eltern',ko:'부모님'},{de:'der Sohn',ko:'아들'},
+        {de:'die Tochter',ko:'딸'},{de:'das Kind',ko:'아이'},{de:'die Kinder',ko:'아이들'},{de:'der Bruder',ko:'형/동생 (남)'},{de:'die Schwester',ko:'언니/누나/여동생'},
+        {de:'der Großvater',ko:'할아버지'},{de:'die Großmutter',ko:'할머니'},{de:'die Großeltern',ko:'조부모님'},{de:'der Onkel',ko:'삼촌'},{de:'die Tante',ko:'이모/고모'},
+        {de:'der Cousin',ko:'사촌 (남)'},{de:'die Cousine',ko:'사촌 (여)'},{de:'der Mann',ko:'남자, 남편'},{de:'die Frau',ko:'여자, 아내'},{de:'der Freund',ko:'친구 (남), 남자친구'},
+        {de:'die Freundin',ko:'친구 (여), 여자친구'},{de:'der Name',ko:'이름'},{de:'der Vorname',ko:'이름'},{de:'der Nachname',ko:'성'},{de:'die Adresse',ko:'주소'},
+        {de:'die Straße',ko:'길'},{de:'die Nummer',ko:'번호'},{de:'die Telefonnummer',ko:'전화번호'},{de:'das Telefon',ko:'전화'},{de:'das Handy',ko:'휴대폰'},
+        {de:'die E-Mail',ko:'이메일'},{de:'das Alter',ko:'나이'},{de:'alt',ko:'늙은'},{de:'jung',ko:'젊은'},{de:'das Jahr',ko:'년'},
+        {de:'der Monat',ko:'월'},{de:'der Tag',ko:'일'},{de:'heute',ko:'오늘'},{de:'gestern',ko:'어제'},{de:'morgen',ko:'내일'},
+        {de:'geboren',ko:'태어난'},{de:'der Geburtstag',ko:'생일'},{de:'der Geburtsort',ko:'출생지'},{de:'das Land',ko:'나라'},{de:'Deutschland',ko:'독일'},
+        {de:'deutsch',ko:'독일의'},{de:'die Sprache',ko:'언어'},{de:'verheiratet',ko:'기혼의'},
+
+        // Day 3: 숫자 & 시간
+        {de:'null',ko:'0'},{de:'eins',ko:'1'},{de:'zwei',ko:'2'},{de:'drei',ko:'3'},{de:'vier',ko:'4'},
+        {de:'fünf',ko:'5'},{de:'sechs',ko:'6'},{de:'sieben',ko:'7'},{de:'acht',ko:'8'},{de:'neun',ko:'9'},
+        {de:'zehn',ko:'10'},{de:'elf',ko:'11'},{de:'zwölf',ko:'12'},{de:'dreizehn',ko:'13'},{de:'vierzehn',ko:'14'},
+        {de:'fünfzehn',ko:'15'},{de:'sechzehn',ko:'16'},{de:'siebzehn',ko:'17'},{de:'achtzehn',ko:'18'},{de:'neunzehn',ko:'19'},
+        {de:'zwanzig',ko:'20'},{de:'dreißig',ko:'30'},{de:'vierzig',ko:'40'},{de:'fünfzig',ko:'50'},{de:'sechzig',ko:'60'},
+        {de:'siebzig',ko:'70'},{de:'achtzig',ko:'80'},{de:'neunzig',ko:'90'},{de:'hundert',ko:'100'},{de:'tausend',ko:'1000'},
+        {de:'die Zeit',ko:'시간'},{de:'die Uhr',ko:'시계'},{de:'die Stunde',ko:'시간 (1시간)'},{de:'die Minute',ko:'분'},{de:'früh',ko:'이른'},
+        {de:'spät',ko:'늦은'},{de:'der Morgen',ko:'아침'},{de:'der Mittag',ko:'정오'},{de:'der Abend',ko:'저녁'},{de:'die Nacht',ko:'밤'},
+        {de:'der Montag',ko:'월요일'},{de:'der Dienstag',ko:'화요일'},{de:'der Mittwoch',ko:'수요일'},{de:'der Donnerstag',ko:'목요일'},{de:'der Freitag',ko:'금요일'},
+        {de:'der Samstag',ko:'토요일'},{de:'der Sonntag',ko:'일요일'},{de:'die Woche',ko:'주'},{de:'das Wochenende',ko:'주말'},{de:'wann',ko:'언제'},
+
+        // Day 4: 집 & 가구
+        {de:'das Haus',ko:'집'},{de:'die Wohnung',ko:'아파트'},{de:'das Zimmer',ko:'방'},{de:'das Wohnzimmer',ko:'거실'},{de:'das Schlafzimmer',ko:'침실'},
+        {de:'die Küche',ko:'부엌'},{de:'das Badezimmer',ko:'욕실'},{de:'das Bad',ko:'욕실'},{de:'die Toilette',ko:'화장실'},{de:'der Flur',ko:'복도'},
+        {de:'der Balkon',ko:'발코니'},{de:'der Garten',ko:'정원'},{de:'das Dach',ko:'지붕'},{de:'die Tür',ko:'문'},{de:'das Fenster',ko:'창문'},
+        {de:'die Wand',ko:'벽'},{de:'der Boden',ko:'바닥'},{de:'die Treppe',ko:'계단'},{de:'der Aufzug',ko:'엘리베이터'},{de:'das Möbel',ko:'가구'},
+        {de:'der Tisch',ko:'테이블'},{de:'der Stuhl',ko:'의자'},{de:'das Bett',ko:'침대'},{de:'der Schrank',ko:'옷장'},{de:'das Sofa',ko:'소파'},
+        {de:'der Sessel',ko:'안락의자'},{de:'das Regal',ko:'선반'},{de:'der Fernseher',ko:'텔레비전'},{de:'der Computer',ko:'컴퓨터'},{de:'das Radio',ko:'라디오'},
+        {de:'die Lampe',ko:'램프'},{de:'das Licht',ko:'빛'},{de:'der Kühlschrank',ko:'냉장고'},{de:'der Herd',ko:'가스레인지'},{de:'die Waschmaschine',ko:'세탁기'},
+        {de:'das Bild',ko:'그림'},{de:'der Spiegel',ko:'거울'},{de:'das Buch',ko:'책'},{de:'die Zeitung',ko:'신문'},
+        {de:'wohnen',ko:'살다'},{de:'mieten',ko:'임대하다'},{de:'kaufen',ko:'사다'},{de:'teuer',ko:'비싼'},{de:'billig',ko:'싼'},
+        {de:'groß',ko:'큰'},{de:'klein',ko:'작은'},{de:'neu',ko:'새로운'},
+
+        // Day 5: 음식 & 음료
+        {de:'das Essen',ko:'음식'},{de:'das Trinken',ko:'음료'},{de:'das Frühstück',ko:'아침식사'},{de:'das Mittagessen',ko:'점심식사'},{de:'das Abendessen',ko:'저녁식사'},
+        {de:'das Brot',ko:'빵'},{de:'das Brötchen',ko:'롤빵'},{de:'die Butter',ko:'버터'},{de:'der Käse',ko:'치즈'},{de:'die Wurst',ko:'소시지'},
+        {de:'das Fleisch',ko:'고기'},{de:'das Hähnchen',ko:'닭고기'},{de:'der Fisch',ko:'생선'},{de:'das Ei',ko:'달걀'},{de:'die Milch',ko:'우유'},
+        {de:'der Joghurt',ko:'요구르트'},{de:'das Obst',ko:'과일'},{de:'der Apfel',ko:'사과'},{de:'die Banane',ko:'바나나'},{de:'die Orange',ko:'오렌지'},
+        {de:'das Gemüse',ko:'채소'},{de:'die Kartoffel',ko:'감자'},{de:'die Tomate',ko:'토마토'},{de:'der Salat',ko:'샐러드'},{de:'die Zwiebel',ko:'양파'},
+        {de:'die Suppe',ko:'수프'},{de:'der Reis',ko:'쌀'},{de:'die Nudeln',ko:'면'},{de:'die Pizza',ko:'피자'},{de:'der Zucker',ko:'설탕'},
+        {de:'das Salz',ko:'소금'},{de:'das Wasser',ko:'물'},{de:'der Kaffee',ko:'커피'},{de:'der Tee',ko:'차'},{de:'der Saft',ko:'주스'},
+        {de:'das Bier',ko:'맥주'},{de:'der Wein',ko:'와인'},{de:'essen',ko:'먹다'},{de:'trinken',ko:'마시다'},{de:'kochen',ko:'요리하다'},
+        {de:'schmecken',ko:'맛이 나다'},{de:'lecker',ko:'맛있는'},{de:'süß',ko:'달콤한'},{de:'sauer',ko:'신'},{de:'salzig',ko:'짠'},
+        {de:'scharf',ko:'매운'},{de:'heiß',ko:'뜨거운'},{de:'kalt',ko:'차가운'},{de:'warm',ko:'따뜻한'},{de:'das Restaurant',ko:'레스토랑'},
+
+        // Day 6: 쇼핑 & 돈
+        {de:'einkaufen',ko:'쇼핑하다'},{de:'verkaufen',ko:'팔다'},{de:'das Geschäft',ko:'가게'},{de:'der Laden',ko:'상점'},{de:'der Supermarkt',ko:'슈퍼마켓'},
+        {de:'die Bäckerei',ko:'빵집'},{de:'die Metzgerei',ko:'정육점'},{de:'die Apotheke',ko:'약국'},{de:'die Bank',ko:'은행'},{de:'die Post',ko:'우체국'},
+        {de:'der Markt',ko:'시장'},{de:'das Geld',ko:'돈'},{de:'der Euro',ko:'유로'},{de:'der Cent',ko:'센트'},{de:'der Preis',ko:'가격'},
+        {de:'kosten',ko:'비용이 들다'},{de:'bezahlen',ko:'지불하다'},{de:'die Rechnung',ko:'계산서'},{de:'die Kasse',ko:'계산대'},{de:'das Wechselgeld',ko:'잔돈'},
+        {de:'die Kreditkarte',ko:'신용카드'},{de:'bar',ko:'현금으로'},{de:'die Kleidung',ko:'옷'},{de:'das Hemd',ko:'셔츠'},{de:'die Hose',ko:'바지'},
+        {de:'das Kleid',ko:'드레스'},{de:'der Rock',ko:'치마'},{de:'die Jacke',ko:'재킷'},{de:'der Mantel',ko:'코트'},{de:'die Schuhe',ko:'신발'},
+        {de:'die Socken',ko:'양말'},{de:'der Hut',ko:'모자'},{de:'die Tasche',ko:'가방'},{de:'lang',ko:'긴'},{de:'kurz',ko:'짧은'},
+        {de:'eng',ko:'좁은'},{de:'weit',ko:'넓은'},{de:'schön',ko:'아름다운'},{de:'hässlich',ko:'못생긴'},{de:'sauber',ko:'깨끗한'},
+        {de:'schmutzig',ko:'더러운'},{de:'die Farbe',ko:'색깔'},{de:'schwarz',ko:'검은색'},
+
+        // Day 7: 교통 & 여행
+        {de:'fahren',ko:'타다, 운전하다'},{de:'laufen',ko:'달리다'},{de:'das Auto',ko:'자동차'},{de:'der Bus',ko:'버스'},{de:'die Bahn',ko:'기차'},
+        {de:'der Zug',ko:'기차'},{de:'die S-Bahn',ko:'근교전차'},{de:'die U-Bahn',ko:'지하철'},{de:'das Taxi',ko:'택시'},{de:'das Fahrrad',ko:'자전거'},
+        {de:'das Flugzeug',ko:'비행기'},{de:'das Schiff',ko:'배'},{de:'der Bahnhof',ko:'기차역'},{de:'der Flughafen',ko:'공항'},{de:'die Haltestelle',ko:'정류장'},
+        {de:'der Parkplatz',ko:'주차장'},{de:'die Autobahn',ko:'고속도로'},{de:'der Weg',ko:'길'},{de:'links',ko:'왼쪽'},{de:'rechts',ko:'오른쪽'},
+        {de:'geradeaus',ko:'직진'},{de:'die Richtung',ko:'방향'},{de:'nah',ko:'가까운'},{de:'weit',ko:'먼'},{de:'schnell',ko:'빠른'},
+        {de:'langsam',ko:'느린'},{de:'die Reise',ko:'여행'},{de:'reisen',ko:'여행하다'},{de:'die Ferien',ko:'휴가'},{de:'der Urlaub',ko:'휴가'},
+        {de:'das Hotel',ko:'호텔'},{de:'die Pension',ko:'펜션'},        {de:'die Rezeption',ko:'리셉션'},{de:'der Schlüssel',ko:'열쇠'},
+        {de:'das Gepäck',ko:'짐'},{de:'der Koffer',ko:'가방'},{de:'der Pass',ko:'여권'},{de:'das Ticket',ko:'표'},{de:'die Fahrkarte',ko:'승차권'},
+        {de:'reservieren',ko:'예약하다'},{de:'buchen',ko:'예약하다'},{de:'ankommen',ko:'도착하다'},{de:'abfahren',ko:'출발하다'},{de:'einsteigen',ko:'타다'},
+        {de:'aussteigen',ko:'내리다'},{de:'umsteigen',ko:'갈아타다'},
+
+        // Day 8-14: A1 나머지 단어들 (약 300개 추가)
+        {de:'der Körper',ko:'몸'},{de:'der Kopf',ko:'머리'},{de:'das Haar',ko:'머리카락'},{de:'das Gesicht',ko:'얼굴'},{de:'das Auge',ko:'눈'},
+        {de:'die Nase',ko:'코'},{de:'der Mund',ko:'입'},{de:'das Ohr',ko:'귀'},{de:'der Hals',ko:'목'},{de:'der Arm',ko:'팔'},
+        {de:'die Hand',ko:'손'},{de:'der Finger',ko:'손가락'},{de:'das Bein',ko:'다리'},{de:'der Fuß',ko:'발'},{de:'der Rücken',ko:'등'},
+        {de:'der Bauch',ko:'배'},{de:'das Herz',ko:'심장'},{de:'die Gesundheit',ko:'건강'},{de:'gesund',ko:'건강한'},{de:'krank',ko:'아픈'},
+        {de:'die Krankheit',ko:'질병'},{de:'der Schmerz',ko:'아픔'},{de:'weh tun',ko:'아프다'},{de:'der Arzt',ko:'의사 (남)'},{de:'die Ärztin',ko:'의사 (여)'},
+        {de:'das Krankenhaus',ko:'병원'},{de:'die Medizin',ko:'약, 의학'},{de:'das Medikament',ko:'약'},{de:'müde',ko:'피곤한'},{de:'stark',ko:'강한'},
+        {de:'schwach',ko:'약한'},{de:'dick',ko:'뚱뚱한'},{de:'dünn',ko:'마른'},{de:'schlafen',ko:'자다'},{de:'aufwachen',ko:'일어나다'},
+
+        {de:'der Beruf',ko:'직업'},{de:'die Arbeit',ko:'일'},{de:'der Arbeiter',ko:'노동자'},{de:'der Angestellte',ko:'회사원'},{de:'der Chef',ko:'상사'},
+        {de:'der Kollege',ko:'동료 (남)'},{de:'die Kollegin',ko:'동료 (여)'},{de:'das Büro',ko:'사무실'},{de:'die Firma',ko:'회사'},{de:'der Lehrer',ko:'선생님 (남)'},
+        {de:'die Lehrerin',ko:'선생님 (여)'},{de:'der Verkäufer',ko:'판매원 (남)'},{de:'die Verkäuferin',ko:'판매원 (여)'},{de:'der Koch',ko:'요리사 (남)'},{de:'die Köchin',ko:'요리사 (여)'},
+        {de:'der Student',ko:'학생 (남)'},{de:'die Studentin',ko:'학생 (여)'},{de:'der Schüler',ko:'학생 (남)'},{de:'die Schülerin',ko:'학생 (여)'},{de:'das Gehalt',ko:'급여'},
+        {de:'verdienen',ko:'벌다'},{de:'die Pause',ko:'휴식'},{de:'wichtig',ko:'중요한'},{de:'schwer',ko:'어려운'},{de:'leicht',ko:'쉬운'},
+
+        {de:'die Schule',ko:'학교'},{de:'die Universität',ko:'대학교'},{de:'die Klasse',ko:'반'},{de:'der Unterricht',ko:'수업'},{de:'lehren',ko:'가르치다'},
+        {de:'das Fach',ko:'과목'},{de:'Englisch',ko:'영어'},{de:'Mathematik',ko:'수학'},{de:'Geschichte',ko:'역사'},{de:'Kunst',ko:'미술'},
+        {de:'Musik',ko:'음악'},{de:'Sport',ko:'체육'},{de:'das Heft',ko:'공책'},{de:'der Bleistift',ko:'연필'},{de:'der Kuli',ko:'볼펜'},
+        {de:'das Papier',ko:'종이'},{de:'die Tafel',ko:'칠판'},{de:'das Internet',ko:'인터넷'},{de:'die Hausaufgabe',ko:'숙제'},{de:'die Prüfung',ko:'시험'},
+        {de:'die Note',ko:'성적'},{de:'richtig',ko:'옳은'},{de:'falsch',ko:'틀린'},{de:'erklären',ko:'설명하다'},{de:'lesen',ko:'읽다'},
+        {de:'schreiben',ko:'쓰다'},{de:'rechnen',ko:'계산하다'},
+
+        {de:'die Freizeit',ko:'여가시간'},{de:'das Hobby',ko:'취미'},{de:'spielen',ko:'놀다, 연주하다'},{de:'das Spiel',ko:'게임'},{de:'Fußball',ko:'축구'},
+        {de:'Tennis',ko:'테니스'},{de:'schwimmen',ko:'수영하다'},{de:'wandern',ko:'하이킹하다'},{de:'die Musik',ko:'음악'},{de:'singen',ko:'노래하다'},
+        {de:'das Lied',ko:'노래'},{de:'die Gitarre',ko:'기타'},{de:'das Klavier',ko:'피아노'},{de:'die Zeitschrift',ko:'잡지'},{de:'der Roman',ko:'소설'},
+        {de:'das Fernsehen',ko:'TV 시청'},{de:'der Film',ko:'영화'},{de:'das Kino',ko:'영화관'},{de:'das Theater',ko:'극장'},{de:'das Konzert',ko:'콘서트'},
+        {de:'das Museum',ko:'박물관'},{de:'malen',ko:'그리다'},{de:'zeichnen',ko:'그리다'},{de:'fotografieren',ko:'사진찍다'},{de:'die Kamera',ko:'카메라'},
+        {de:'das Foto',ko:'사진'},{de:'tanzen',ko:'춤추다'},{de:'backen',ko:'굽다'},{de:'sammeln',ko:'수집하다'},{de:'Spaß haben',ko:'재미있다'},
+
+        {de:'das Wetter',ko:'날씨'},{de:'die Sonne',ko:'태양'},{de:'der Regen',ko:'비'},{de:'der Schnee',ko:'눈'},{de:'der Wind',ko:'바람'},
+        {de:'die Wolke',ko:'구름'},{de:'der Himmel',ko:'하늘'},{de:'sonnig',ko:'맑은'},{de:'regnerisch',ko:'비 오는'},{de:'bewölkt',ko:'흐린'},
+        {de:'der Frühling',ko:'봄'},{de:'der Sommer',ko:'여름'},{de:'der Herbst',ko:'가을'},{de:'der Winter',ko:'겨울'},{de:'die Natur',ko:'자연'},
+        {de:'der Baum',ko:'나무'},{de:'die Blume',ko:'꽃'},{de:'das Gras',ko:'풀'},{de:'der Park',ko:'공원'},{de:'der Wald',ko:'숲'},
+        {de:'der Berg',ko:'산'},{de:'das Meer',ko:'바다'},{de:'der See',ko:'호수'},{de:'der Fluss',ko:'강'},{de:'das Tier',ko:'동물'},
+        {de:'der Hund',ko:'개'},{de:'die Katze',ko:'고양이'},{de:'der Vogel',ko:'새'},{de:'das Pferd',ko:'말'},{de:'die Kuh',ko:'소'},
+        {de:'das Schwein',ko:'돼지'},{de:'das Huhn',ko:'닭'},{de:'die Maus',ko:'쥐'},{de:'spazieren gehen',ko:'산책하다'},{de:'die Luft',ko:'공기'},
+
+        {de:'weiß',ko:'흰색'},{de:'rot',ko:'빨간색'},{de:'blau',ko:'파란색'},{de:'grün',ko:'초록색'},{de:'gelb',ko:'노란색'},
+        {de:'orange',ko:'주황색'},{de:'rosa',ko:'분홍색'},{de:'lila',ko:'보라색'},{de:'braun',ko:'갈색'},{de:'grau',ko:'회색'},
+        {de:'hell',ko:'밝은'},{de:'dunkel',ko:'어두운'},{de:'bunt',ko:'알록달록한'},{de:'hoch',ko:'높은'},{de:'niedrig',ko:'낮은'},
+        {de:'breit',ko:'넓은'},{de:'schmal',ko:'좁은'},{de:'interessant',ko:'흥미로운'},{de:'langweilig',ko:'지루한'},{de:'laut',ko:'시끄러운'},
+        {de:'leise',ko:'조용한'},{de:'voll',ko:'가득한'},{de:'leer',ko:'빈'},{de:'ruhig',ko:'조용한'},{de:'nervös',ko:'긴장한'},
+
+        {de:'der',ko:'남성관사'},{de:'die',ko:'여성관사'},{de:'das',ko:'중성관사'},{de:'ein',ko:'부정관사 (남/중성)'},{de:'eine',ko:'부정관사 (여성)'},
+        {de:'und',ko:'그리고'},{de:'oder',ko:'또는'},{de:'aber',ko:'그러나'},{de:'wenn',ko:'만약'},{de:'wie',ko:'어떻게'},
+        {de:'wo',ko:'어디'},{de:'was',ko:'무엇'},{de:'wer',ko:'누구'},{de:'warum',ko:'왜'},{de:'welcher',ko:'어떤'},
+        {de:'hier',ko:'여기'},{de:'dort',ko:'저기'},{de:'da',ko:'거기'},{de:'oben',ko:'위에'},{de:'unten',ko:'아래에'},
+        {de:'vorn',ko:'앞에'},{de:'hinten',ko:'뒤에'},{de:'über',ko:'위에'},{de:'unter',ko:'아래에'},{de:'neben',ko:'옆에'},
+        {de:'vor',ko:'앞에'},{de:'hinter',ko:'뒤에'},{de:'in',ko:'안에'},{de:'auf',ko:'위에'},{de:'an',ko:'에'},
+        {de:'mit',ko:'함께'},{de:'ohne',ko:'없이'},{de:'für',ko:'위해'},{de:'nach',ko:'후에'},{de:'zwischen',ko:'사이에'}
+      ],
+      
+      a2: [
+        // A2 레벨 650개 단어
+        {de:'beginnen',ko:'시작하다'},{de:'beenden',ko:'끝내다'},{de:'aufhören',ko:'그만두다'},{de:'weitermachen',ko:'계속하다'},{de:'versuchen',ko:'시도하다'},
+        {de:'schaffen',ko:'해내다'},{de:'gelingen',ko:'성공하다'},{de:'misslingen',ko:'실패하다'},{de:'sich freuen',ko:'기뻐하다'},{de:'sich ärgern',ko:'화내다'},
+        {de:'sich interessieren',ko:'관심을 갖다'},{de:'sich entscheiden',ko:'결정하다'},{de:'sich erinnern',ko:'기억하다'},{de:'sich vorstellen',ko:'상상하다'},{de:'sich verabreden',ko:'약속하다'},
+        {de:'sich treffen',ko:'만나다'},{de:'sich unterhalten',ko:'대화하다'},{de:'sich beschweren',ko:'불평하다'},{de:'sich entschuldigen',ko:'사과하다'},{de:'sich bedanken',ko:'감사하다'},
+        {de:'empfehlen',ko:'추천하다'},{de:'vorschlagen',ko:'제안하다'},{de:'erlauben',ko:'허락하다'},{de:'verbieten',ko:'금지하다'},{de:'helfen',ko:'돕다'},
+        {de:'unterstützen',ko:'지원하다'},{de:'raten',ko:'조언하다'},{de:'warnen',ko:'경고하다'},{de:'beschreiben',ko:'묘사하다'},{de:'erzählen',ko:'이야기하다'},
+        {de:'berichten',ko:'보고하다'},{de:'informieren',ko:'알리다'},{de:'mitteilen',ko:'알리다'},{de:'diskutieren',ko:'토론하다'},{de:'besprechen',ko:'의논하다'},
+        {de:'planen',ko:'계획하다'},{de:'organisieren',ko:'조직하다'},{de:'vorbereiten',ko:'준비하다'},{de:'teilnehmen',ko:'참가하다'},{de:'besuchen',ko:'방문하다'},
+        {de:'einladen',ko:'초대하다'},{de:'abholen',ko:'데리러 가다'},{de:'bringen',ko:'가져다주다'},{de:'holen',ko:'가져오다'},{de:'schicken',ko:'보내다'},
+        {de:'bekommen',ko:'받다'},{de:'geben',ko:'주다'},{de:'nehmen',ko:'가져가다'},{de:'lassen',ko:'놔두다'},
+
+        {de:'das Gefühl',ko:'감정'},{de:'die Emotion',ko:'감정'},{de:'die Stimmung',ko:'기분'},{de:'glücklich',ko:'행복한'},{de:'zufrieden',ko:'만족한'},
+        {de:'fröhlich',ko:'즐거운'},{de:'lustig',ko:'재미있는'},{de:'traurig',ko:'슬픈'},{de:'unglücklich',ko:'불행한'},{de:'enttäuscht',ko:'실망한'},
+        {de:'wütend',ko:'화난'},{de:'ärgerlich',ko:'짜증난'},{de:'aufgeregt',ko:'흥분한'},{de:'entspannt',ko:'편안한'},{de:'energisch',ko:'활기찬'},
+        {de:'motiviert',ko:'동기부여된'},{de:'interessiert',ko:'관심있는'},{de:'neugierig',ko:'호기심 많은'},{de:'überrascht',ko:'놀란'},{de:'verwirrt',ko:'혼란스러운'},
+        {de:'sicher',ko:'확신하는'},{de:'unsicher',ko:'불확실한'},{de:'selbstbewusst',ko:'자신감 있는'},{de:'schüchtern',ko:'수줍은'},{de:'offen',ko:'열린'},
+        {de:'freundlich',ko:'친근한'},{de:'höflich',ko:'정중한'},{de:'unhöflich',ko:'무례한'},{de:'ehrlich',ko:'정직한'},{de:'zuverlässig',ko:'신뢰할 만한'},
+        {de:'geduldig',ko:'참을성 있는'},{de:'ungeduldig',ko:'참을성 없는'},{de:'fleißig',ko:'부지런한'},{de:'faul',ko:'게으른'},{de:'ordentlich',ko:'정리된'},
+        {de:'kreativ',ko:'창의적인'},{de:'intelligent',ko:'똑똑한'},{de:'verrückt',ko:'미친'},{de:'normal',ko:'정상적인'},{de:'seltsam',ko:'이상한'},
+
+        {de:'die Meinung',ko:'의견'},{de:'meinen',ko:'의견을 갖다'},{de:'denken',ko:'생각하다'},{de:'glauben',ko:'믿다'},{de:'finden',ko:'생각하다'},
+        {de:'der Eindruck',ko:'인상'},{de:'scheinen',ko:'~인 것 같다'},{de:'aussehen',ko:'보이다'},{de:'stimmen',ko:'맞다'},{de:'sich irren',ko:'틀리다'},
+        {de:'zweifeln',ko:'의심하다'},{de:'überzeugen',ko:'확신시키다'},{de:'zustimmen',ko:'동의하다'},{de:'ablehnen',ko:'거부하다'},{de:'kritisieren',ko:'비판하다'},
+        {de:'loben',ko:'칭찬하다'},{de:'bewerten',ko:'평가하다'},{de:'vergleichen',ko:'비교하다'},{de:'bevorzugen',ko:'선호하다'},{de:'lieben',ko:'사랑하다'},
+        {de:'hassen',ko:'미워하다'},{de:'gefallen',ko:'마음에 들다'},{de:'interessieren',ko:'흥미를 갖다'},{de:'langweilen',ko:'지루하게 하다'},{de:'ärgern',ko:'화나게 하다'},
+        {de:'freuen',ko:'기쁘게 하다'},{de:'überraschen',ko:'놀라게 하다'},{de:'enttäuschen',ko:'실망시키다'},{de:'hoffen',ko:'희망하다'},{de:'wünschen',ko:'바라다'},
+        {de:'erwarten',ko:'기대하다'},{de:'Angst haben',ko:'무서워하다'},{de:'mutig',ko:'용감한'},{de:'ängstlich',ko:'겁 많은'},{de:'optimistisch',ko:'낙관적인'},
+
+        {de:'die Kultur',ko:'문화'},{de:'die Gesellschaft',ko:'사회'},{de:'die Tradition',ko:'전통'},{de:'traditionell',ko:'전통적인'},{de:'modern',ko:'현대적인'},
+        {de:'das Fest',ko:'축제'},{de:'die Feier',ko:'축하'},{de:'feiern',ko:'축하하다'},{de:'die Party',ko:'파티'},{de:'heiraten',ko:'결혼하다'},
+        {de:'die Religion',ko:'종교'},{de:'religiös',ko:'종교적인'},{de:'die Politik',ko:'정치'},{de:'politisch',ko:'정치적인'},{de:'wählen',ko:'선택하다, 투표하다'},
+        {de:'die Qualität',ko:'품질'},{de:'die Menge',ko:'양'},{de:'die Werbung',ko:'광고'},{de:'werben',ko:'광고하다'},{de:'konkurrieren',ko:'경쟁하다'},
+        {de:'die Konkurrenz',ko:'경쟁'},{de:'erfolgreich',ko:'성공한'},{de:'der Erfolg',ko:'성공'},{de:'scheitern',ko:'실패하다'},{de:'der Gewinn',ko:'이익'},
+        {de:'der Verlust',ko:'손실'},{de:'ausgeben',ko:'쓰다'},{de:'sparen',ko:'절약하다'},{de:'investieren',ko:'투자하다'},{de:'günstig',ko:'저렴한'},
+
+        {de:'die Technik',ko:'기술'},{de:'technisch',ko:'기술적인'},{de:'digital',ko:'디지털의'},{de:'online',ko:'온라인'},{de:'die Website',ko:'웹사이트'},
+        {de:'senden',ko:'보내다'},{de:'empfangen',ko:'받다'},{de:'klicken',ko:'클릭하다'},{de:'das Smartphone',ko:'스마트폰'},{de:'die App',ko:'앱'},
+        {de:'das Tablet',ko:'태블릿'},{de:'der Laptop',ko:'노트북'},{de:'die Maus',ko:'마우스'},{de:'die Tastatur',ko:'키보드'},{de:'der Bildschirm',ko:'화면'},
+        {de:'das Programm',ko:'프로그램'},{de:'die Software',ko:'소프트웨어'},{de:'installieren',ko:'설치하다'},{de:'funktionieren',ko:'작동하다'},{de:'reparieren',ko:'수리하다'},
+        {de:'der Song',ko:'노래'},{de:'das Video',ko:'비디오'},{de:'die Medien',ko:'미디어'},{de:'die Nachrichten',ko:'뉴스'},{de:'die Information',ko:'정보'},
+        {de:'kommunizieren',ko:'소통하다'},{de:'die Kommunikation',ko:'소통'},{de:'das Netzwerk',ko:'네트워크'},{de:'vernetzen',ko:'연결하다'},
+
+        {de:'die Umwelt',ko:'환경'},{de:'natürlich',ko:'자연스러운'},{de:'künstlich',ko:'인공적인'},{de:'umweltfreundlich',ko:'환경친화적인'},{de:'der Umweltschutz',ko:'환경보호'},
+        {de:'schützen',ko:'보호하다'},{de:'zerstören',ko:'파괴하다'},{de:'verschmutzen',ko:'오염시키다'},{de:'die Verschmutzung',ko:'오염'},{de:'das Klima',ko:'기후'},
+        {de:'der Klimawandel',ko:'기후변화'},{de:'die Energie',ko:'에너지'},{de:'verschwenden',ko:'낭비하다'},{de:'der Strom',ko:'전기'},{de:'das Gas',ko:'가스'},
+        {de:'das Öl',ko:'기름'},{de:'die Kohle',ko:'석탄'},{de:'das Benzin',ko:'휘발유'},{de:'atmen',ko:'숨쉬다'},{de:'das Recycling',ko:'재활용'},
+        {de:'recyceln',ko:'재활용하다'},{de:'der Müll',ko:'쓰레기'},{de:'der Abfall',ko:'폐기물'},{de:'wegwerfen',ko:'버리다'},{de:'trennen',ko:'분리하다'},
+        {de:'die Tonne',ko:'통'},{de:'biologisch',ko:'생물학적인'},{de:'chemisch',ko:'화학적인'},{de:'giftig',ko:'독성의'},{de:'schädlich',ko:'해로운'},
+        {de:'nachhaltig',ko:'지속가능한'},{de:'erneuerbar',ko:'재생가능한'},{de:'die Solarenergie',ko:'태양에너지'},{de:'die Batterie',ko:'배터리'},
+
+        {de:'sich entwickeln',ko:'발전하다'},{de:'entstehen',ko:'생기다'},{de:'verschwinden',ko:'사라지다'},{de:'erscheinen',ko:'나타나다'},{de:'sich verändern',ko:'변하다'},
+        {de:'verbessern',ko:'개선하다'},{de:'verschlechtern',ko:'악화시키다'},{de:'zunehmen',ko:'증가하다'},{de:'abnehmen',ko:'감소하다'},{de:'steigen',ko:'올라가다'},
+        {de:'fallen',ko:'떨어지다'},{de:'sinken',ko:'가라앉다'},{de:'wachsen',ko:'자라다'},{de:'sich konzentrieren',ko:'집중하다'},{de:'sich entspannen',ko:'휴식하다'},
+        {de:'sich anstrengen',ko:'노력하다'},{de:'sich bemühen',ko:'애쓰다'},{de:'sich verhalten',ko:'행동하다'},{de:'beobachten',ko:'관찰하다'},{de:'untersuchen',ko:'조사하다'},
+        {de:'entdecken',ko:'발견하다'},{de:'erfinden',ko:'발명하다'},{de:'herstellen',ko:'제조하다'},{de:'produzieren',ko:'생산하다'},{de:'verwenden',ko:'사용하다'},
+        {de:'benutzen',ko:'이용하다'},{de:'anwenden',ko:'적용하다'},{de:'kontrollieren',ko:'통제하다'},{de:'überprüfen',ko:'확인하다'},{de:'prüfen',ko:'시험하다'},
+        {de:'testen',ko:'테스트하다'},{de:'messen',ko:'측정하다'},{de:'wiegen',ko:'무게를 재다'},{de:'zählen',ko:'세다'},{de:'schätzen',ko:'추정하다'},
+        {de:'vermuten',ko:'추측하다'},{de:'annehmen',ko:'가정하다'},{de:'beweisen',ko:'증명하다'},{de:'bestätigen',ko:'확인하다'},
+
+        {de:'der Begriff',ko:'개념'},{de:'die Idee',ko:'아이디어'},{de:'der Gedanke',ko:'생각'},{de:'die Theorie',ko:'이론'},{de:'die Praxis',ko:'실습'},
+        {de:'praktisch',ko:'실용적인'},{de:'theoretisch',ko:'이론적인'},{de:'abstrakt',ko:'추상적인'},{de:'konkret',ko:'구체적인'},{de:'allgemein',ko:'일반적인'},
+        {de:'speziell',ko:'특별한'},{de:'besonders',ko:'특히'},{de:'hauptsächlich',ko:'주로'},{de:'normalerweise',ko:'보통'},{de:'gewöhnlich',ko:'보통'},
+        {de:'typisch',ko:'전형적인'},{de:'charakteristisch',ko:'특징적인'},{de:'einzigartig',ko:'독특한'},{de:'außergewöhnlich',ko:'특별한'},{de:'selten',ko:'드문'},
+        {de:'häufig',ko:'자주'},{de:'oft',ko:'자주'},{de:'manchmal',ko:'때때로'},{de:'gelegentlich',ko:'가끔'},{de:'regelmäßig',ko:'정기적으로'},
+        {de:'ständig',ko:'지속적으로'},{de:'immer',ko:'항상'},{de:'nie',ko:'결코 ~않다'},{de:'niemals',ko:'결코 ~않다'},{de:'kaum',ko:'거의 ~않다'},
+        {de:'fast',ko:'거의'},{de:'beinahe',ko:'거의'},{de:'völlig',ko:'완전히'},{de:'ganz',ko:'완전히'},{de:'teilweise',ko:'부분적으로'},
+        {de:'ziemlich',ko:'꽤'},{de:'sehr',ko:'매우'},{de:'äußerst',ko:'극도로'},{de:'relativ',ko:'상대적으로'},{de:'absolut',ko:'절대적으로'},
+        {de:'genau',ko:'정확히'},{de:'ungefähr',ko:'대략'},{de:'etwa',ko:'약'},{de:'mindestens',ko:'최소한'},{de:'höchstens',ko:'최대한'},
+
+        {de:'die Beziehung',ko:'관계'},{de:'das Verhältnis',ko:'관계'},{de:'die Verbindung',ko:'연결'},{de:'verbinden',ko:'연결하다'},{de:'sich trennen',ko:'헤어지다'},
+        {de:'sich scheiden lassen',ko:'이혼하다'},{de:'die Scheidung',ko:'이혼'},{de:'die Ehe',ko:'결혼'},{de:'der Ehemann',ko:'남편'},{de:'die Ehefrau',ko:'아내'},
+        {de:'der Partner',ko:'파트너 (남)'},{de:'die Partnerin',ko:'파트너 (여)'},{de:'das Paar',ko:'커플'},{de:'single',ko:'독신의'},{de:'ledig',ko:'미혼의'},
+        {de:'geschieden',ko:'이혼한'},{de:'verlobt',ko:'약혼한'},{de:'die Verlobung',ko:'약혼'},{de:'kennenlernen',ko:'알게 되다'},{de:'sich verlieben',ko:'사랑에 빠지다'},
+        {de:'die Liebe',ko:'사랑'},{de:'verliebt',ko:'사랑에 빠진'},{de:'romantisch',ko:'로맨틱한'},{de:'die Romantik',ko:'로맨스'},{de:'zärtlich',ko:'다정한'},
+        {de:'liebevoll',ko:'사랑스러운'},{de:'eifersüchtig',ko:'질투하는'},{de:'die Eifersucht',ko:'질투'},{de:'vertrauen',ko:'신뢰하다'},{de:'das Vertrauen',ko:'신뢰'},
+        {de:'die Loyalität',ko:'충성'},{de:'untreu',ko:'불충실한'},{de:'streiten',ko:'싸우다'},{de:'der Streit',ko:'싸움'},{de:'sich versöhnen',ko:'화해하다'},
+        {de:'verzeihen',ko:'용서하다'},{de:'die Verzeihung',ko:'용서'},
+
+        {de:'die Wirtschaft',ko:'경제'},{de:'wirtschaftlich',ko:'경제적인'},{de:'das Geschäft',ko:'사업'},{de:'geschäftlich',ko:'사업의'},{de:'das Unternehmen',ko:'기업'},
+        {de:'der Betrieb',ko:'사업체'},{de:'die Industrie',ko:'산업'},{de:'industriell',ko:'산업의'},{de:'die Produktion',ko:'생산'},{de:'der Handel',ko:'무역'},
+        {de:'handeln',ko:'거래하다'},{de:'der Verkauf',ko:'판매'},{de:'der Kauf',ko:'구매'},        {de:'der Kunde',ko:'고객 (남)'},{de:'die Kundin',ko:'고객 (여)'},{de:'der Service',ko:'서비스'},{de:'die Dienstleistung',ko:'서비스'},
+        {de:'das Marketing',ko:'마케팅'},{de:'der Konkurrent',ko:'경쟁자'},{de:'das Scheitern',ko:'실패'},{de:'die Investition',ko:'투자'},
+        {de:'das Kapital',ko:'자본'},{de:'das Budget',ko:'예산'},{de:'die Kosten',ko:'비용'},{de:'kostenlos',ko:'무료의'},{de:'preiswert',ko:'값싼'},
+
+        {de:'die Behandlung',ko:'치료'},{de:'behandeln',ko:'치료하다'},{de:'heilen',ko:'치유하다'},{de:'die Heilung',ko:'치유'},{de:'gesund werden',ko:'건강해지다'},
+        {de:'sich erholen',ko:'회복하다'},{de:'die Erholung',ko:'회복'},{de:'die Therapie',ko:'치료법'},{de:'der Therapeut',ko:'치료사 (남)'},{de:'die Therapeutin',ko:'치료사 (여)'},
+        {de:'die Operation',ko:'수술'},{de:'operieren',ko:'수술하다'},{de:'der Chirurg',ko:'외과의사 (남)'},{de:'die Chirurgin',ko:'외과의사 (여)'},{de:'die Diagnose',ko:'진단'},
+        {de:'diagnostizieren',ko:'진단하다'},{de:'das Symptom',ko:'증상'},{de:'die Ursache',ko:'원인'},{de:'verursachen',ko:'원인이 되다'},{de:'leiden',ko:'고통받다'},
+        {de:'das Leiden',ko:'고통'},{de:'der Patient',ko:'환자 (남)'},{de:'die Patientin',ko:'환자 (여)'},{de:'das Rezept',ko:'처방전'},{de:'verschreiben',ko:'처방하다'},
+        {de:'der Apotheker',ko:'약사 (남)'},{de:'die Apothekerin',ko:'약사 (여)'},{de:'das Vitamin',ko:'비타민'},{de:'das Antibiotikum',ko:'항생제'},{de:'die Spritze',ko:'주사'},
+        {de:'impfen',ko:'예방접종하다'},{de:'die Impfung',ko:'예방접종'},{de:'der Impfstoff',ko:'백신'},{de:'anstecken',ko:'전염시키다'},{de:'sich anstecken',ko:'전염되다'},
+        {de:'die Ansteckung',ko:'전염'},{de:'die Infektion',ko:'감염'},{de:'infizieren',ko:'감염시키다'},{de:'das Virus',ko:'바이러스'},{de:'die Bakterien',ko:'박테리아'},
+        {de:'die Hygiene',ko:'위생'},{de:'hygienisch',ko:'위생적인'},{de:'die Krankenkasse',ko:'건강보험'},{de:'versichert',ko:'보험에 가입된'},{de:'die Versicherung',ko:'보험'},
+        {de:'die Vorsorge',ko:'예방'},{de:'vorbeugen',ko:'예방하다'},{de:'gesundheitlich',ko:'건강상의'},{de:'medizinisch',ko:'의학적인'}
+      ]
+    };
+
+    // ================== 상태 ==================
+    let currentSetKey = null; // a1/a2
+    let level = 1;           // 1,2,3,4
+    let queue = [];          // 진행 큐
+    let solvedCount = 0;     // (1~3단계) 정답 처리된 수
+    let current = null;      // {de,ko}
+
+    // 4단계 전용 상태
+    let testMode = false;
+    let testUserId = '';
+    let testDone = 0;        // 푼 개수
+    let testCorrect = 0;     // 맞은 개수
+    let qStart = 0;          // 시작 시간(ms)
+    let timer = null;        // setInterval id
+    let timeLeft = 0;        // 남은 초
+
+    // ================== 엘리먼트 ==================
+    const $  = sel => document.querySelector(sel);
+    const $$ = sel => document.querySelectorAll(sel);
+
+    const viewSets = $('#view-sets');
+    const viewLevels = $('#view-levels');
+    const viewQuiz = $('#view-quiz');
+
+    const crumb = $('#crumb');
+    const backBtn = $('#back-btn');
+    const ttsBtn = $('#tts-btn');
+
+    const chosenSetChip = $('#chosen-set');
+
+    const statusChip = $('#status-chip');
+    const timerChip = $('#timer-chip');
+    const wordEl = $('#word');
+    const wordInfoEl = $('#word-info');
+    const choicesEl = $('#choices');
+
+    const idkBtn = $('#idk-btn');
+    const toggleChoicesBtn = $('#toggle-choices-btn');
+    const nextBtn = $('#next-btn');
+
+    const modal = $('#result-modal');
+    const modalTitle = $('#result-title');
+    const modalDetail = $('#result-detail');
+    const modalNext = $('#modal-next');
+
+    const idModal = $('#id-modal');
+    const idInput = $('#user-id-input');
+    const idStart = $('#id-start');
+    const idCancel = $('#id-cancel');
+
+    // ================== 유틸 ==================
+    const sleep = ms => new Promise(r=>setTimeout(r,ms));
+    const rnd = (n)=>Math.floor(Math.random()*n);
+    const shuffle = (arr)=>arr.sort(()=>Math.random()-0.5);
+
+    function setView(id){
+      for(const v of $$('.view')) v.classList.remove('active');
+      $(id).classList.add('active');
+    }
+
+    // ---------- TTS (독일어 음성) ----------
+    let germanVoice = null;
+    function pickVoice(){
+      const voices = window.speechSynthesis.getVoices();
+      germanVoice = voices.find(v=>/^de-DE/i.test(v.lang) && /Google|Microsoft|Apple/i.test(v.name))
+                   || voices.find(v=>/^de-/i.test(v.lang))
+                   || voices.find(v=>/de/i.test(v.lang))
+                   || null;
+    }
+    if('speechSynthesis' in window){
+      pickVoice();
+      window.speechSynthesis.onvoiceschanged = pickVoice;
+    }
+    function speak(text){
+      if(!('speechSynthesis' in window) || !text) return;
+      try{
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = 'de-DE';
+        if(germanVoice) u.voice = germanVoice;
+        u.rate = 0.85; // 독일어는 조금 천천히
+        u.pitch = 1.0;
+        u.volume = 1;
+        setTimeout(()=> window.speechSynthesis.speak(u), 80);
+      }catch(e){/* noop */}
+    }
+
+    // ---------- WebAudio 효과음 ----------
+    const AC = window.AudioContext||window.webkitAudioContext; const ctx = AC? new AC():null;
+    function tone(freq=660,duration=90,type='sine',gain=0.18){
+      if(!ctx) return; const o=ctx.createOscillator(); const g=ctx.createGain();
+      o.type=type; o.frequency.value=freq; o.connect(g); g.connect(ctx.destination);
+      const now = ctx.currentTime; g.gain.setValueAtTime(0.0001,now); g.gain.exponentialRampToValueAtTime(gain, now+0.01);
+      o.start(); g.gain.exponentialRampToValueAtTime(0.0001, now+duration/1000);
+      o.stop(now+duration/1000+0.01);
+    }
+    const uiTap = ()=> tone(520,70,'sine',0.14);
+    const playCorrect = ()=>{ tone(880,110,'triangle',0.22); setTimeout(()=>tone(1175,110,'triangle',0.20),95); };
+    const playWrong = ()=>{ tone(220,170,'sawtooth',0.18); setTimeout(()=>tone(180,190,'sawtooth',0.16),150); };
+
+    // ---------- 선택지 생성 (2열 그리드) ----------
+    function choiceCountFor(lv){ return lv===1?2: lv===2?4:6; }
+
+    function buildChoices(word){
+      const set = SETS[currentSetKey];
+      const need = choiceCountFor(level);
+      const others = shuffle(set.filter(w=>w.de!==word.de)).slice(0, need-1);
+      const list = shuffle([{de:word.de,ko:word.ko}, ...others]);
+      choicesEl.innerHTML = '';
+      for(const item of list){
+        const btn = document.createElement('button');
+        btn.className='choice';
+        btn.textContent = item.ko;
+        btn.dataset.de = word.de;
+        btn.dataset.correct = String(item.ko===word.ko);
+        btn.addEventListener('click', onChoice);
+        choicesEl.appendChild(btn);
+      }
+    }
+
+    // ---------- 타이머 (4단계) ----------
+    function startTimer(sec){
+      stopTimer();
+      timeLeft = sec; timerChip.style.display='inline-flex'; timerChip.textContent = `⏱ ${timeLeft}s`;
+      timer = setInterval(()=>{
+        timeLeft--; timerChip.textContent = `⏱ ${timeLeft}s`;
+        if(timeLeft<=0){ stopTimer(); onTimeout(); }
+      },1000);
+    }
+    function stopTimer(){ if(timer){ clearInterval(timer); timer=null; } timerChip.style.display='none'; }
+
+    // ---------- 서버 전송 (4단계) ----------
+    function sendResult(payload){
+      console.log(payload);
+
+      if (payload.type === 'summary') {
+        alert(payload.setLabel + ' : ' + payload.correct + '/' + payload.total);
+      }
+
+      try{
+        if(!SPREADSHEET_URL || SPREADSHEET_URL.includes('PASTE')) return;
+        fetch(SPREADSHEET_URL, {
+          method:'POST',
+          mode:'no-cors',
+          headers:{ 'Content-Type':'text/plain;charset=utf-8' },
+          body: JSON.stringify(payload)
+        });
+      }catch(e){ /* ignore */ }
+    }
+
+    // ---------- 로직 ----------
+    function startSet(setKey){
+      currentSetKey = setKey;
+      chosenSetChip.textContent = labelForSet(setKey);
+      crumb.textContent = labelForSet(setKey);
+      setView('#view-levels');
+      $('#view-quiz #status-chip').textContent='';
+      uiTap();
+    }
+
+    function startLevelCore(lv){
+      level = lv; testMode = (lv===4);
+      queue = [...SETS[currentSetKey]]; // 650개 전부
+      solvedCount = 0; current=null; testDone=0; testCorrect=0;
+      crumb.textContent = `${labelForSet(currentSetKey)} · ${level}단계` + (testMode? ' (테스트)':'');
+      ttsBtn.style.display='inline-flex';
+      backBtn.style.display='inline-flex';
+      nextBtn.disabled = true;
+      wordInfoEl.style.display = 'block';
+      setView('#view-quiz');
+      uiTap();
+      nextQuestion();
+    }
+
+    function labelForSet(key){
+      return key==='a1'? 'A1 기초 650개' : 'A2 중급 650개';
+    }
+
+    function updateStatus(){
+      if(testMode){
+        statusChip.textContent = `${labelForSet(currentSetKey)} · 4단계 · 진행 ${testDone}/650 · 정답 ${testCorrect}`;
+      }else{
+        statusChip.textContent = `${labelForSet(currentSetKey)} · ${level}단계 · 완료 ${solvedCount}/650`;
+      }
+    }
+
+    function nextQuestion(){
+      if(queue.length===0){
+        wordEl.textContent = '완료! 수고했습니다 🙌';
+        wordInfoEl.style.display = 'none';
+        choicesEl.innerHTML='';
+        choicesEl.classList.add('hidden');
+        toggleChoicesBtn.textContent='보기';
+        nextBtn.disabled = true; idkBtn.disabled=true; ttsBtn.disabled=true; stopTimer();
+        //if(testMode){
+          sendResult({type:'summary', userId:testUserId, setKey:currentSetKey, setLabel:labelForSet(currentSetKey), level:4, total:650, correct:testCorrect, timestamp:new Date().toISOString(), userAgent:navigator.userAgent});
+        //}
+        return;
+      }
+      current = queue.shift();
+      updateStatus();
+      wordEl.textContent = current.de;
+      buildChoices(current);
+
+      // 보기 표시 정책
+      if(testMode){
+        choicesEl.classList.remove('hidden');
+        toggleChoicesBtn.style.display='none';
+        startTimer(6);
+      }else{
+        choicesEl.classList.add('hidden');
+        toggleChoicesBtn.style.display='inline-flex';
+      }
+
+      nextBtn.disabled = true;
+      idkBtn.disabled = false;
+      qStart = performance.now();
+      speak(current.de);
+    }
+
+    async function onChoice(e){
+      uiTap();
+      const btn = e.currentTarget; const correct = btn.dataset.correct==='true';
+      [...choicesEl.children].forEach(b=>b.disabled=true);
+      idkBtn.disabled=true;
+
+      const elapsedSec = Math.round((performance.now()-qStart)/100)/10;
+      stopTimer();
+
+      if(correct){
+        btn.classList.add('correct');
+        playCorrect();
+        if(testMode){
+          testDone++; testCorrect++; updateStatus();
+          sendResult({type:'result', userId:testUserId, setKey:currentSetKey, setLabel:labelForSet(currentSetKey), level:4, word:current.de, correctKo:current.ko, selectedKo:btn.textContent, correct:true, elapsedSec, timestamp:new Date().toISOString(), userAgent:navigator.userAgent});
+          await sleep(500);
+          nextQuestion();
+        }else{
+          solvedCount++; updateStatus();
+          await sleep(650);
+          nextQuestion();
+        }
+      }else{
+        btn.classList.add('wrong');
+        [...choicesEl.children].forEach(c=>{ if(c.dataset.correct==='true') c.classList.add('correct'); });
+        playWrong();
+        if(testMode){
+          testDone++; updateStatus();
+          sendResult({type:'result', userId:testUserId, setKey:currentSetKey, setLabel:labelForSet(currentSetKey), level:4, word:current.de, correctKo:current.ko, selectedKo:btn.textContent, correct:false, elapsedSec, timestamp:new Date().toISOString(), userAgent:navigator.userAgent});
+        }else{
+          queue.push(current); // 오답 재등장 (1~3단계)
+        }
+        wrongPopup();
+      }
+    }
+
+    function onTimeout(){
+      [...choicesEl.children].forEach(c=>{ c.disabled=true; if(c.dataset.correct==='true') c.classList.add('correct'); });
+      playWrong();
+      if(testMode){
+        testDone++; updateStatus();
+        const elapsedSec = Math.round((performance.now()-qStart)/100)/10;
+        sendResult({type:'result', userId:testUserId, setKey:currentSetKey, setLabel:labelForSet(currentSetKey), level:4, word:current.de, correctKo:current.ko, selectedKo:'시간초과', correct:false, elapsedSec, timestamp:new Date().toISOString(), userAgent:navigator.userAgent});
+      }else{
+        queue.push(current);
+      }
+      wrongPopup();
+    }
+
+    function wrongPopup(){
+      modalTitle.textContent = '오답!';
+      modalDetail.textContent = `정답: ${current.ko}`;
+      modal.classList.remove('hidden');
+      nextBtn.disabled=false;
+    }
+
+    // ---------- 이벤트 ----------
+    $$('#view-sets .set-card').forEach(card=>{
+      card.addEventListener('click',()=>startSet(card.dataset.set));
+    });
+
+    $('#level-back').addEventListener('click',()=>{ setView('#view-sets'); crumb.textContent='레벨 선택'; uiTap(); });
+
+    // 단계 선택: 4단계는 아이디 입력 모달을 먼저 표시
+    $$('#view-levels [data-level]').forEach(b=> b.addEventListener('click',()=>{
+      const lv = parseInt(b.dataset.level);
+      if(lv===4){
+        idInput.value=''; idModal.classList.remove('hidden');
+      }else{
+        startLevelCore(lv);
+      }
+    }));
+
+    idStart.addEventListener('click',()=>{
+      const v = (idInput.value||'').trim();
+      if(!v){ idInput.focus(); return; }
+      testUserId = v; idModal.classList.add('hidden'); startLevelCore(4);
+    });
+    idCancel.addEventListener('click',()=>{ idModal.classList.add('hidden'); });
+
+    backBtn.addEventListener('click',()=>{ setView('#view-levels'); ttsBtn.style.display='none'; backBtn.style.display='none'; stopTimer(); uiTap(); });
+    ttsBtn.addEventListener('click',()=> { uiTap(); current && speak(current.de); });
+
+    toggleChoicesBtn.addEventListener('click',()=>{
+      uiTap();
+      const hidden = choicesEl.classList.toggle('hidden');
+      toggleChoicesBtn.textContent = hidden? '보기' : '보기 표시됨';
+    });
+
+    idkBtn.addEventListener('click',()=>{
+      uiTap();
+      [...choicesEl.children].forEach(c=> c.disabled=true);
+      [...choicesEl.children].forEach(c=>{ if(c.dataset.correct==='true') c.classList.add('correct'); });
+      stopTimer();
+      if(testMode){
+        testDone++; updateStatus();
+        const elapsedSec = Math.round((performance.now()-qStart)/100)/10;
+        sendResult({type:'result', userId:testUserId, setKey:currentSetKey, setLabel:labelForSet(currentSetKey), level:4, word:current.de, correctKo:current.ko, selectedKo:'모름', correct:false, elapsedSec, timestamp:new Date().toISOString(), userAgent:navigator.userAgent});
+      }else{
+        queue.push(current);
+      }
+      wrongPopup();
+    });
+
+    nextBtn.addEventListener('click',()=>{
+      uiTap();
+      modal.classList.add('hidden');
+      nextQuestion();
+    });
+
+    modalNext.addEventListener('click',()=>{
+      uiTap();
+      modal.classList.add('hidden');
+      nextQuestion();
+    });
+
+    // 초기
+    setView('#view-sets');
+  })();
+  </script>
+</body>
+</html>
